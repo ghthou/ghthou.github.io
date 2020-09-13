@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Spring Boot,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="在本机进行 Spring Boot 项目开发时，如果启动时出现异常，可以在控制台中明确得知异常相关信息然后进行处理.但在远程的测试、生产服务器中，一般是后台启动或者通过 CI 启动项目，无法直接查看控制台中输出的日志信息. 此时如果启动过程中出现异常我们无法及时得知 但是通过 Spring Boot  文档可知, 可以通过监听 ApplicationFailedEvent 事件进行启动异常处理">
+<meta name="keywords" content="Java,Spring Boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 项目启动异常时使用邮件通知">
+<meta property="og:url" content="https://ghthou.github.io/2018/09/25/Spring-Boot项目启动异常时使用邮件通知/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="在本机进行 Spring Boot 项目开发时，如果启动时出现异常，可以在控制台中明确得知异常相关信息然后进行处理.但在远程的测试、生产服务器中，一般是后台启动或者通过 CI 启动项目，无法直接查看控制台中输出的日志信息. 此时如果启动过程中出现异常我们无法及时得知 但是通过 Spring Boot  文档可知, 可以通过监听 ApplicationFailedEvent 事件进行启动异常处理">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring Boot 项目启动异常时使用邮件通知">
+<meta name="twitter:description" content="在本机进行 Spring Boot 项目开发时，如果启动时出现异常，可以在控制台中明确得知异常相关信息然后进行处理.但在远程的测试、生产服务器中，一般是后台启动或者通过 CI 启动项目，无法直接查看控制台中输出的日志信息. 此时如果启动过程中出现异常我们无法及时得知 但是通过 Spring Boot  文档可知, 可以通过监听 ApplicationFailedEvent 事件进行启动异常处理">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2018/09/25/Spring-Boot项目启动异常时使用邮件通知/">
+
+
+
+
+
+  <title>Spring Boot 项目启动异常时使用邮件通知 | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2018/09/25/Spring-Boot项目启动异常时使用邮件通知/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spring Boot 项目启动异常时使用邮件通知</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-25T11:16:47+00:00">
+                2018-09-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在本机进行 Spring Boot 项目开发时，如果启动时出现异常，可以在控制台中明确得知异常相关信息然后进行处理.但在远程的测试、生产服务器中，一般是后台启动或者通过 CI 启动项目，无法直接查看控制台中输出的日志信息. 此时如果启动过程中出现异常我们无法及时得知</p>
+<p>但是通过 <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-spring-application.html#boot-features-application-events-and-listeners" target="_blank" rel="noopener">Spring Boot  文档</a>可知, 可以通过监听 <code>ApplicationFailedEvent</code> 事件进行启动异常处理</p>
+<blockquote>
+<p>6 . An <code>ApplicationFailedEvent</code> is sent if there is an exception on startup.</p>
+</blockquote>
+<p>现在我们希望在出现这些异常时, 发送一封邮件到我预定义的邮箱中</p>
+<h4 id="创建邮件工具类"><a href="#创建邮件工具类" class="headerlink" title="创建邮件工具类"></a>创建邮件工具类</h4><p>发送邮件我们使用 <code>spring-boot-starter-mail</code> 提供的 <code>JavaMailSender</code> 接口, 通过配置 <code>spring.mail</code> 系列参数 Spring Boot 会自动创建 <code>JavaMailSender</code> </p>
+<p>但是可能存在发生异常时 <code>JavaMailSender</code> 还没有创建,所以最好是由我们手动创建 <code>JavaMailSender</code> 对象</p>
+<p>以下是发送邮件工具类 <code>EmailUtils</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.github.ghthou.startexceptionnotifications.samples.util;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.text.MessageFormat;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang3.StringUtils;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang3.exception.ExceptionUtils;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.event.ApplicationFailedEvent;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.ClassPathResource;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.io.support.PropertiesLoaderUtils;</span><br><span class="line"><span class="keyword">import</span> org.springframework.mail.SimpleMailMessage;</span><br><span class="line"><span class="keyword">import</span> org.springframework.mail.javamail.JavaMailSender;</span><br><span class="line"><span class="keyword">import</span> org.springframework.mail.javamail.JavaMailSenderImpl;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.github.ghthou.startexceptionnotifications.samples.properties.NotificationsProperties;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EmailUtils</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> NotificationsProperties NOTIFICATIONS_PROPERTIES;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> JavaMailSender JAVA_MAIL_SENDER;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        NOTIFICATIONS_PROPERTIES = initNotificationsProperties();</span><br><span class="line">        JAVA_MAIL_SENDER = initJavaMailSender();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> JavaMailSender <span class="title">initJavaMailSender</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        JavaMailSenderImpl sender = <span class="keyword">new</span> JavaMailSenderImpl();</span><br><span class="line">        applyProperties(sender);</span><br><span class="line">        <span class="keyword">return</span> sender;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">applyProperties</span><span class="params">(JavaMailSenderImpl sender)</span> </span>&#123;</span><br><span class="line">        NotificationsProperties properties = NOTIFICATIONS_PROPERTIES;</span><br><span class="line"></span><br><span class="line">        sender.setHost(properties.getHost());</span><br><span class="line">        <span class="keyword">if</span> (properties.getPort() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sender.setPort(properties.getPort());</span><br><span class="line">        &#125;</span><br><span class="line">        sender.setUsername(properties.getUsername());</span><br><span class="line">        sender.setPassword(properties.getPassword());</span><br><span class="line">        sender.setProtocol(properties.getProtocol());</span><br><span class="line">        <span class="keyword">if</span> (properties.getDefaultEncoding() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sender.setDefaultEncoding(properties.getDefaultEncoding());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!properties.getProperties().isEmpty()) &#123;</span><br><span class="line">            sender.setJavaMailProperties(asProperties(properties.getProperties()));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Properties <span class="title">asProperties</span><span class="params">(String source)</span> </span>&#123;</span><br><span class="line">        Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">        <span class="keyword">for</span> (String pro : StringUtils.split(source, <span class="string">","</span>)) &#123;</span><br><span class="line">            String[] split = StringUtils.split(pro, <span class="string">"="</span>);</span><br><span class="line">            <span class="keyword">if</span> (split.length == <span class="number">2</span>) &#123;</span><br><span class="line">                properties.put(split[<span class="number">0</span>], split[<span class="number">1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> properties;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> NotificationsProperties <span class="title">initNotificationsProperties</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Properties p = PropertiesLoaderUtils.loadProperties(<span class="keyword">new</span> ClassPathResource(<span class="string">"notifications.properties"</span>));</span><br><span class="line">        NotificationsProperties notificationsProperties = <span class="keyword">new</span> NotificationsProperties();</span><br><span class="line">        notificationsProperties.setAppName(p.getProperty(<span class="string">"notifications.appName"</span>));</span><br><span class="line">        notificationsProperties.setTo(p.getProperty(<span class="string">"notifications.to"</span>));</span><br><span class="line">        notificationsProperties.setHost(p.getProperty(<span class="string">"notifications.host"</span>));</span><br><span class="line">        notificationsProperties.setPort(Integer.valueOf(p.getProperty(<span class="string">"notifications.port"</span>)));</span><br><span class="line">        notificationsProperties.setProtocol(p.getProperty(<span class="string">"notifications.protocol"</span>));</span><br><span class="line">        notificationsProperties.setUsername(p.getProperty(<span class="string">"notifications.username"</span>));</span><br><span class="line">        notificationsProperties.setPassword(p.getProperty(<span class="string">"notifications.password"</span>));</span><br><span class="line">        notificationsProperties.setDefaultEncoding(p.getProperty(<span class="string">"notifications.defaultEncoding"</span>));</span><br><span class="line">        notificationsProperties.setProperties(p.getProperty(<span class="string">"notifications.properties"</span>));</span><br><span class="line">        <span class="keyword">return</span> notificationsProperties;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> JavaMailSender <span class="title">getJavaMailSender</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> JAVA_MAIL_SENDER;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">send</span><span class="params">(SimpleMailMessage simpleMessage)</span> </span>&#123;</span><br><span class="line">        getJavaMailSender().send(simpleMessage);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> SimpleMailMessage <span class="title">createSimpleMailMessage</span><span class="params">(ApplicationFailedEvent event)</span> </span>&#123;</span><br><span class="line">        SimpleMailMessage simpleMessage = <span class="keyword">new</span> SimpleMailMessage();</span><br><span class="line">        <span class="comment">// 发件人</span></span><br><span class="line">        simpleMessage.setFrom(MessageFormat.format(<span class="string">"Spring Boot 启动异常 &lt;&#123;0&#125;&gt;"</span>, NOTIFICATIONS_PROPERTIES.getUsername()));</span><br><span class="line">        <span class="comment">// 收件人</span></span><br><span class="line">        simpleMessage.setTo(NOTIFICATIONS_PROPERTIES.getTo());</span><br><span class="line">        <span class="comment">// 主题</span></span><br><span class="line">        simpleMessage.setSubject(MessageFormat.format(<span class="string">"&#123;0&#125; 启动异常"</span>, NOTIFICATIONS_PROPERTIES.getAppName()));</span><br><span class="line">        <span class="comment">// 内容</span></span><br><span class="line">        simpleMessage.setText(ExceptionUtils.getStackTrace(event.getException()));</span><br><span class="line">        <span class="keyword">return</span> simpleMessage;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="创建启动异常监听器"><a href="#创建启动异常监听器" class="headerlink" title="创建启动异常监听器"></a>创建启动异常监听器</h4><p>然后创建一个 Spring 监听器 <code>StartExceptionNotificationsListener</code>,监听启动异常, 然后判断当前环境,如果不是 <code>dev</code> 环境,进行异常通知</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.github.ghthou.startexceptionnotifications.samples.listener;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.event.ApplicationFailedEvent;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationListener;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ConfigurableApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.github.ghthou.startexceptionnotifications.samples.util.EmailUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StartExceptionNotificationsListener</span> <span class="keyword">implements</span> <span class="title">ApplicationListener</span>&lt;<span class="title">ApplicationFailedEvent</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onApplicationEvent</span><span class="params">(ApplicationFailedEvent event)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext applicationContext = event.getApplicationContext();</span><br><span class="line">        <span class="comment">// 如果不是 dev 环境,因为 dev 环境会查看控制台</span></span><br><span class="line">        <span class="keyword">if</span> (applicationContext == <span class="keyword">null</span> || applicationContext.getEnvironment().acceptsProfiles(<span class="string">"!dev"</span>)) &#123;</span><br><span class="line">            <span class="comment">// 进行异常通知</span></span><br><span class="line">            EmailUtils.send(EmailUtils.createSimpleMailMessage(event));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p>配置自动注册 <code>StartExceptionNotificationsListener</code></p>
+<p>在 <code>resources/META-INF/spring.factories</code> 中进行以下配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">org.springframework.context.ApplicationListener=\</span><br><span class="line">com.github.ghthou.startexceptionnotifications.samples.listener.StartExceptionNotificationsListener</span><br></pre></td></tr></table></figure>
+<p>创建用于模拟启动过程中出现异常的启动监听器 <code>ApplicationStartingEventListener</code>,<code>ApplicationEnvironmentPreparedEventListener</code> 等</p>
+<p>然后在 <code>SpringApplication</code> 手动添加这些事件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.github.ghthou.startexceptionnotifications.samples;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StartExceptionNotificationsApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication springApplication = <span class="keyword">new</span> SpringApplication(StartExceptionNotificationsApplication<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">        <span class="comment">// 不触发</span></span><br><span class="line">        <span class="comment">// springApplication.addListeners(new ApplicationStartingEventListener());</span></span><br><span class="line">        <span class="comment">// 触发</span></span><br><span class="line">        <span class="comment">// springApplication.addListeners(new ApplicationEnvironmentPreparedEventListener());</span></span><br><span class="line">        <span class="comment">// 触发</span></span><br><span class="line">        <span class="comment">// springApplication.addListeners(new ApplicationPreparedEventListener());</span></span><br><span class="line">        <span class="comment">// 触发</span></span><br><span class="line">        <span class="comment">// springApplication.addListeners(new ApplicationStartedEventListener());</span></span><br><span class="line">        <span class="comment">// 不触发</span></span><br><span class="line">        <span class="comment">// springApplication.addListeners(new ApplicationReadyEventListener());</span></span><br><span class="line">        springApplication.run(args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h4><p>最后通过测试结果可知</p>
+<ul>
+<li style="list-style: none"><input type="checkbox"> ApplicationStartingEvent</li>
+<li style="list-style: none"><input type="checkbox" checked> ApplicationEnvironmentPreparedEvent</li>
+<li style="list-style: none"><input type="checkbox" checked> ApplicationPreparedEvent</li>
+<li style="list-style: none"><input type="checkbox" checked> ApplicationStartedEvent</li>
+<li style="list-style: none"><input type="checkbox"> ApplicationReadyEvent</li>
+</ul>
+<p>三个事件会进行 <code>ApplicationFailedEvent</code> 事件处理, 不过 <code>ApplicationStartingEvent</code> 事件一般不会产生异常, 而 <code>ApplicationReadyEvent</code> 是启动完成后触发的事件</p>
+<h4 id="拓展"><a href="#拓展" class="headerlink" title="拓展"></a>拓展</h4><p>目前是使用 email 通知, 如果希望使用 短信,微信,钉钉 通知的话, 在 <code>StartExceptionNotificationsListener</code> 中自定义通知处理即可</p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/ghthou/spring-boot-start-exception-notifications-samples" target="_blank" rel="noopener">GitHub</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/14/Apache-Common-Lang-学习之-concurrent-包/" rel="next" title="Apache Common Lang 学习之 concurrent 包">
+                <i class="fa fa-chevron-left"></i> Apache Common Lang 学习之 concurrent 包
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/26/使用Spring-Boot-Admin管理Spring-Boot项目/" rel="prev" title="使用 Spring Boot Admin 管理 Spring Boot 项目">
+                使用 Spring Boot Admin 管理 Spring Boot 项目 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建邮件工具类"><span class="nav-number">1.</span> <span class="nav-text">创建邮件工具类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建启动异常监听器"><span class="nav-number">2.</span> <span class="nav-text">创建启动异常监听器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试结果"><span class="nav-number">4.</span> <span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拓展"><span class="nav-number">5.</span> <span class="nav-text">拓展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#源码"><span class="nav-number">6.</span> <span class="nav-text">源码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

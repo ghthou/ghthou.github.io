@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Jenkins,GitLab,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="所需插件在 Jenkins 中安装 Generic Webhook Trigger 插件 Jenkinsfile 配置在 GitLab 中创建一个用于集成的演示项目 并在该项目根路径创建一个 Jenkinsfile 文件, 文件内容如下 ,12345678910111213141516171819202122232425262728293031323334353637383940414243444">
+<meta name="keywords" content="Jenkins,GitLab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Multibranch Pipeline 集成 GitLab Webhook">
+<meta property="og:url" content="https://ghthou.github.io/2020/09/13/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="所需插件在 Jenkins 中安装 Generic Webhook Trigger 插件 Jenkinsfile 配置在 GitLab 中创建一个用于集成的演示项目 并在该项目根路径创建一个 Jenkinsfile 文件, 文件内容如下 ,12345678910111213141516171819202122232425262728293031323334353637383940414243444">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ghthou.github.io/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/不通过SCM自动化触发配置.png">
+<meta property="og:image" content="https://ghthou.github.io/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/webhook配置.png">
+<meta property="og:image" content="https://ghthou.github.io/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/流水线语法1.png">
+<meta property="og:image" content="https://ghthou.github.io/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/流水线语法2.png">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Jenkins Multibranch Pipeline 集成 GitLab Webhook">
+<meta name="twitter:description" content="所需插件在 Jenkins 中安装 Generic Webhook Trigger 插件 Jenkinsfile 配置在 GitLab 中创建一个用于集成的演示项目 并在该项目根路径创建一个 Jenkinsfile 文件, 文件内容如下 ,12345678910111213141516171819202122232425262728293031323334353637383940414243444">
+<meta name="twitter:image" content="https://ghthou.github.io/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/不通过SCM自动化触发配置.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2020/09/13/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/">
+
+
+
+
+
+  <title>Jenkins Multibranch Pipeline 集成 GitLab Webhook | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2020/09/13/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Jenkins Multibranch Pipeline 集成 GitLab Webhook</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-13T03:08:00+00:00">
+                2020-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="所需插件"><a href="#所需插件" class="headerlink" title="所需插件"></a>所需插件</h1><p>在 Jenkins 中安装 <a href="https://plugins.jenkins.io/generic-webhook-trigger/" target="_blank" rel="noopener">Generic Webhook Trigger</a> 插件</p>
+<h1 id="Jenkinsfile-配置"><a href="#Jenkinsfile-配置" class="headerlink" title="Jenkinsfile 配置"></a>Jenkinsfile 配置</h1><p>在 GitLab 中创建一个用于集成的演示项目</p>
+<p>并在该项目根路径创建一个 Jenkinsfile 文件, 文件内容如下</p>
+<figure class="highlight groovy"><figcaption><span>,</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">    agent any</span><br><span class="line">    <span class="comment">// 触发器, 默认存在三种, 但是不满足 Webhook 需求, 所以使用插件提供的 GenericTrigger 触发器</span></span><br><span class="line">    triggers &#123;</span><br><span class="line">        <span class="comment">// 由 Generic Webhook Trigger 提供的触发器</span></span><br><span class="line">        GenericTrigger(</span><br><span class="line">                <span class="comment">// 参数, 在这里配置的参数会被配置为环境变量</span></span><br><span class="line">                <span class="comment">// 支持使用 JSONPath 和 XPath 进行提取</span></span><br><span class="line">                <span class="comment">// 提取来源为 webhook 发送的 request body 中的内容</span></span><br><span class="line">                <span class="comment">// GitLab 发送的 request body 内容格式可通过文档查看, 文档地址为你的 GitLab 访问地址 + /help/user/project/integrations/webhooks</span></span><br><span class="line"><span class="symbol">                genericVariables:</span> [</span><br><span class="line">                        <span class="comment">// 提取分支名称, 格式为 refs/heads/&#123;branch&#125;</span></span><br><span class="line">                        [<span class="string">key:</span> <span class="string">'WEBHOOK_REF'</span>, <span class="string">value:</span> <span class="string">'$.ref'</span>],</span><br><span class="line">                        <span class="comment">// 提取用户显示名称</span></span><br><span class="line">                        [<span class="string">key:</span> <span class="string">'WEBHOOK_USER_NAME'</span>, <span class="string">value:</span> <span class="string">'$.user_name'</span>],</span><br><span class="line">                        <span class="comment">// 提取最近提交 id</span></span><br><span class="line">                        [<span class="string">key:</span> <span class="string">'WEBHOOK_RECENT_COMMIT_ID'</span>, <span class="string">value:</span> <span class="string">'$.commits[0].id'</span>],</span><br><span class="line">                        <span class="comment">// 提取最近提交 message</span></span><br><span class="line">                        [<span class="string">key:</span> <span class="string">'WEBHOOK_RECENT_COMMIT_MESSAGE'</span>, <span class="string">value:</span> <span class="string">'$.commits[0].message'</span>],</span><br><span class="line">                        <span class="comment">// 如需更多参数可通过查看 request body 参数文档进行提取</span></span><br><span class="line">                ],</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 项目运行消息, 会显示在 Jenkins Blue 中的项目活动列表中</span></span><br><span class="line"><span class="symbol">                causeString:</span> <span class="string">'$WEBHOOK_USER_NAME 推送 commit 到 $WEBHOOK_REF 分支'</span>,</span><br><span class="line"></span><br><span class="line">                <span class="comment">// token, 因为对外的 webhook url 是一致的, 当希望触发某个特定的 Job 时可以为每个 Job 配置不同的 token, 然后在 webhook 中配置该参数</span></span><br><span class="line"><span class="symbol">                token:</span> <span class="string">'webhook-test-token'</span>,</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 打印通过 genericVariables 配置的变量</span></span><br><span class="line"><span class="symbol">                printContributedVariables:</span> <span class="literal">true</span>,</span><br><span class="line">                <span class="comment">// 打印 request body 内容</span></span><br><span class="line"><span class="symbol">                printPostContent:</span> <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 避免使用已触发工作的信息作出响应</span></span><br><span class="line"><span class="symbol">                silentResponse:</span> <span class="literal">false</span>,</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 可选的正则表达式过滤, 比如希望仅在 master 分支上触发, 你可以进行如下配置</span></span><br><span class="line"><span class="symbol">                regexpFilterText:</span> <span class="string">'$WEBHOOK_REF'</span>,</span><br><span class="line"><span class="symbol">                regexpFilterExpression:</span> <span class="string">'refs/heads/master'</span></span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">    stages &#123;</span><br><span class="line">        stage(<span class="string">'查看环境变量'</span>) &#123;</span><br><span class="line">            steps &#123;</span><br><span class="line">                sh <span class="string">"env"</span></span><br><span class="line">                sh <span class="string">"echo \\\$WEBHOOK_REF = $WEBHOOK_REF"</span></span><br><span class="line">                echo <span class="string">"env.WEBHOOK_REF = $&#123;env.WEBHOOK_REF&#125;"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="Jenkins-配置"><a href="#Jenkins-配置" class="headerlink" title="Jenkins 配置"></a>Jenkins 配置</h1><p>在 Jenkins 创建一个 Multibranch Pipeline 项目</p>
+<p>配置分支源为 Git, 项目仓库为 GitLab 中的项目地址</p>
+<p>同时配置不通过SCM自动化触发, 该配置是指保存后不要直接运行 Job</p>
+<p><img src="/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/不通过SCM自动化触发配置.png" alt="不通过SCM自动化触发配置"></p>
+<p>然后进行保存</p>
+<h1 id="Webhook-配置"><a href="#Webhook-配置" class="headerlink" title="Webhook 配置"></a>Webhook 配置</h1><p>进入项目 Webhook 配置页面</p>
+<p><img src="/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/webhook配置.png" alt="webhook配置"></p>
+<p>URL 地址格式为 <code>{jenkins 地址}/generic-webhook-trigger/invoke?token={token}</code></p>
+<blockquote>
+<p>如果 jenkins 地址为内网, 需要在 GitLab 管理配置页面的 Outbound requests 下勾选 Allow requests to the local network from web hooks and services 属性, 否则会保存失败</p>
+<p>参考链接: <a href="https://docs.gitlab.com/ee/security/webhooks.html" target="_blank" rel="noopener">https://docs.gitlab.com/ee/security/webhooks.html</a></p>
+</blockquote>
+<blockquote>
+<p>Generic Webhook Trigger 插件可以通过配置 IP 白名单的方式仅接受允许的 IP</p>
+<p>参考链接: <a href="https://github.com/jenkinsci/generic-webhook-trigger-plugin#whitelist-hosts" target="_blank" rel="noopener">https://github.com/jenkinsci/generic-webhook-trigger-plugin#whitelist-hosts</a></p>
+</blockquote>
+<p>然后点击最下方的保存按钮即可</p>
+<p>保存后在 webhooks 页面最下面可以看到该记录, 点击 <strong>Test</strong> 按钮, 然后选择 Push events, 此时会手动触发一次 webhook 请求, 如果响应成功, 会显示一条 <strong>Hook executed successfully: HTTP 200</strong> 的消息提示</p>
+<p>同时在 Jenkins 的 Blue 页面查看项目活动记录, 可以看到项目运行成功的记录, 其中的消息部分为即为 causeString 属性</p>
+<h1 id="手动运行"><a href="#手动运行" class="headerlink" title="手动运行"></a>手动运行</h1><p>除了通过 Webhook 运行的方式外, 我们可能存在手动运行的需求</p>
+<p>如果我们在 Jenkinsfile 中没有依赖 genericVariables 配置的环境变量的话, 我们可以直接手动运行, 否则的话使用该变量会出现问题</p>
+<p>这个时候需要定义一个与 genericVariables 中 key 名称相同的 parameter</p>
+<p>配置方式如下</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">    agent any</span><br><span class="line">    parameters &#123;</span><br><span class="line">        string(<span class="string">name:</span> <span class="string">'WEBHOOK_REF'</span>, <span class="string">defaultValue:</span> <span class="string">'refs/heads/master'</span>, <span class="string">description:</span> <span class="string">'分支名称?'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    triggers &#123;</span><br><span class="line">        <span class="comment">// 由 Generic Webhook Trigger 提供的触发器</span></span><br><span class="line">        GenericTrigger(</span><br><span class="line"><span class="symbol">            genericVariables:</span> [</span><br><span class="line">                <span class="comment">// 提取分支名称, 格式为 refs/heads/&#123;branch&#125;</span></span><br><span class="line">                [<span class="string">key:</span> <span class="string">'WEBHOOK_REF'</span>, <span class="string">value:</span> <span class="string">'$.ref'</span>],</span><br><span class="line">            ],</span><br><span class="line">            </span><br><span class="line"><span class="symbol">            token:</span> <span class="string">'webhook-test-token'</span>,</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">    stages &#123;</span><br><span class="line">        stage(<span class="string">'查看环境变量'</span>) &#123;</span><br><span class="line">            steps &#123;</span><br><span class="line">                sh <span class="string">"env"</span></span><br><span class="line">                sh <span class="string">"echo \\\$WEBHOOK_REF = $WEBHOOK_REF"</span></span><br><span class="line">                echo <span class="string">"env.WEBHOOK_REF = $&#123;env.WEBHOOK_REF&#125;"</span></span><br><span class="line">                echo <span class="string">"params.WEBHOOK_REF = $&#123;params.WEBHOOK_REF&#125;"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果是通过 webhook 运行, Generic Webhook Trigger 会使用 genericVariables 中的 WEBHOOK_REF 填充 parameter 中的 WEBHOOK_REF</p>
+<p>如果是手动运行, Generic Webhook Trigger 会使用 parameter 中的 WEBHOOK_REF 填充 genericVariables 中的 WEBHOOK_REF</p>
+<h1 id="GenericTrigger-自定义配置"><a href="#GenericTrigger-自定义配置" class="headerlink" title="GenericTrigger 自定义配置"></a>GenericTrigger 自定义配置</h1><p>GenericTrigger 的属性说明可以查看 <a href="https://github.com/jenkinsci/generic-webhook-trigger-plugin" target="_blank" rel="noopener">插件官方文档</a></p>
+<p>同时可以在项目配置页面点击<strong>流水线语法</strong>, 然后使用可视化语法生成器生成 trigger 配置</p>
+<p><img src="/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/流水线语法1.png" alt="webhook配置"></p>
+<p><img src="/images/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/流水线语法2.png" alt="webhook配置"></p>
+<p>填写配置属性后点击 Generate Declarative Directive 按钮即可生成</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+          
+            <a href="/tags/GitLab/" rel="tag"># GitLab</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/04/Spring-MVC-配置接收-String-参数时自动去除前后空格/" rel="next" title="Spring MVC 配置接收 String 参数时自动去除前后空格">
+                <i class="fa fa-chevron-left"></i> Spring MVC 配置接收 String 参数时自动去除前后空格
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#所需插件"><span class="nav-number">1.</span> <span class="nav-text">所需插件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jenkinsfile-配置"><span class="nav-number">2.</span> <span class="nav-text">Jenkinsfile 配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jenkins-配置"><span class="nav-number">3.</span> <span class="nav-text">Jenkins 配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Webhook-配置"><span class="nav-number">4.</span> <span class="nav-text">Webhook 配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#手动运行"><span class="nav-number">5.</span> <span class="nav-text">手动运行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GenericTrigger-自定义配置"><span class="nav-number">6.</span> <span class="nav-text">GenericTrigger 自定义配置</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

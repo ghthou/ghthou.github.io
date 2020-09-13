@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Common Lang,源码研究,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="标准的 Java 库不能提供足够的方法来操纵其核心类，所以 Apache Commons Lang 为我们提供了这些额外的方法本文便介绍 Apache Commons Lang 中 concurrent 包的使用说明  引入 jar 包JDK 版本需要大于等于 1.7 Maven12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;org.apache.common">
+<meta name="keywords" content="Java,Common Lang,源码研究">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Common Lang 学习之 concurrent 包">
+<meta property="og:url" content="https://ghthou.github.io/2018/01/14/Apache-Common-Lang-学习之-concurrent-包/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="标准的 Java 库不能提供足够的方法来操纵其核心类，所以 Apache Commons Lang 为我们提供了这些额外的方法本文便介绍 Apache Commons Lang 中 concurrent 包的使用说明  引入 jar 包JDK 版本需要大于等于 1.7 Maven12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;org.apache.common">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Common Lang 学习之 concurrent 包">
+<meta name="twitter:description" content="标准的 Java 库不能提供足够的方法来操纵其核心类，所以 Apache Commons Lang 为我们提供了这些额外的方法本文便介绍 Apache Commons Lang 中 concurrent 包的使用说明  引入 jar 包JDK 版本需要大于等于 1.7 Maven12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;org.apache.common">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2018/01/14/Apache-Common-Lang-学习之-concurrent-包/">
+
+
+
+
+
+  <title>Apache Common Lang 学习之 concurrent 包 | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2018/01/14/Apache-Common-Lang-学习之-concurrent-包/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Apache Common Lang 学习之 concurrent 包</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-14T13:14:27+00:00">
+                2018-01-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>标准的 Java 库不能提供足够的方法来操纵其核心类，所以 <a href="http://commons.apache.org/proper/commons-lang/" target="_blank" rel="noopener">Apache Commons Lang</a> 为我们提供了这些额外的方法<br>本文便介绍 <a href="http://commons.apache.org/proper/commons-lang/" target="_blank" rel="noopener">Apache Commons Lang</a> 中 concurrent 包的使用说明</p>
+</blockquote>
+<h1 id="引入-jar-包"><a href="#引入-jar-包" class="headerlink" title="引入 jar 包"></a>引入 jar 包</h1><p>JDK 版本需要大于等于 1.7</p>
+<h2 id="Maven"><a href="#Maven" class="headerlink" title="Maven"></a>Maven</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.commons<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-lang3<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.7<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h2><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compile <span class="string">group:</span> <span class="string">'org.apache.commons'</span>, <span class="string">name:</span> <span class="string">'commons-lang3'</span>, <span class="string">version:</span> <span class="string">'3.7'</span></span><br></pre></td></tr></table></figure>
+<h1 id="包结构说明"><a href="#包结构说明" class="headerlink" title="包结构说明"></a>包结构说明</h1><h2 id="接口摘要"><a href="#接口摘要" class="headerlink" title="接口摘要"></a>接口摘要</h2><table>
+<thead>
+<tr>
+<th style="text-align:left">Interface</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CircuitBreaker.html" target="_blank" rel="noopener">CircuitBreaker</a><t></t></td>
+<td>描述断路器 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Circuit Breaker</a> 的接口</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Computable.html" target="_blank" rel="noopener">Computable</a>&lt;I,O&gt;</td>
+<td>为单个参数的计算提供定义一个包装接口,并返回一个结果</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentInitializer.html" target="_blank" rel="noopener">ConcurrentInitializer</a><t></t></td>
+<td>定义线程安全的初始化接口</td>
+</tr>
+</tbody>
+</table>
+<h2 id="类摘要"><a href="#类摘要" class="headerlink" title="类摘要"></a>类摘要</h2><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AbstractCircuitBreaker.html" target="_blank" rel="noopener">AbstractCircuitBreaker</a><t></t></td>
+<td>断路器基础类</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicInitializer.html" target="_blank" rel="noopener">AtomicInitializer</a><t></t></td>
+<td><code>ConcurrentInitializer</code> 接口基于 <code>AtomicReference</code> 变量的实现类</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicSafeInitializer.html" target="_blank" rel="noopener">AtomicSafeInitializer</a><t></t></td>
+<td><code>ConcurrentInitializer</code> 接口基于 <code>AtomicReference</code> 变量的实现类,但是初始化方法 <code>AtomicSafeInitializer.initialize()</code>只会执行一次</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BackgroundInitializer.html" target="_blank" rel="noopener">BackgroundInitializer</a><t></t></td>
+<td><code>ConcurrentInitializer</code> 接口实现类,通过后台线程完成初始化</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BasicThreadFactory.html" target="_blank" rel="noopener">BasicThreadFactory</a></td>
+<td><code>ThreadFactory</code> 接口实现类,提供一些配置获取方法</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BasicThreadFactory.Builder.html" target="_blank" rel="noopener">BasicThreadFactory.Builder</a></td>
+<td><code>BasicThreadFactory</code> 的 <code>Builder</code> 模式实例</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CallableBackgroundInitializer.html" target="_blank" rel="noopener">CallableBackgroundInitializer</a><t></t></td>
+<td><code>BackgroundInitializer</code> 实现类,通过传入 <code>Callable</code>进行实现</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentUtils.html" target="_blank" rel="noopener">ConcurrentUtils</a></td>
+<td>提供 <code>java.util.concurrent</code> 包相关功能的工具类</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConstantInitializer.html" target="_blank" rel="noopener">ConstantInitializer</a><t></t></td>
+<td><code>ConcurrentInitializer</code> 接口实现类,直接返回构造器中传入的参数</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/EventCountCircuitBreaker.html" target="_blank" rel="noopener">EventCountCircuitBreaker</a></td>
+<td>计算特定事件的 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Circuit Breaker</a> 断路器模式的简单实现</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/LazyInitializer.html" target="_blank" rel="noopener">LazyInitializer</a><t></t></td>
+<td><code>ConcurrentInitializer</code> 接口实现类,通过双重检查锁进行实现</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Memoizer.html" target="_blank" rel="noopener">Memoizer</a>&lt;I,O&gt;</td>
+<td>为单个参数的计算定义一个包装的接口,并返回一个结果</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/MultiBackgroundInitializer.html" target="_blank" rel="noopener">MultiBackgroundInitializer</a></td>
+<td><code>BackgroundInitializer</code>实现类,可以在后台进行多个初始化</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/MultiBackgroundInitializer.MultiBackgroundInitializerResults.html" target="_blank" rel="noopener">MultiBackgroundInitializer.MultiBackgroundInitializerResults</a></td>
+<td>一个数据类,用于存储<code>MultiBackgroundInitializer</code> 初始化后的结果</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ThresholdCircuitBreaker.html" target="_blank" rel="noopener">ThresholdCircuitBreaker</a></td>
+<td>通过给定阈值开启 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Circuit Breaker</a> 断路器模式的简单实现</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/TimedSemaphore.html" target="_blank" rel="noopener">TimedSemaphore</a></td>
+<td>一个专门的<em>信号量</em>实现,在给定的时间内提供许可</td>
+</tr>
+</tbody>
+</table>
+<h2 id="枚举摘要"><a href="#枚举摘要" class="headerlink" title="枚举摘要"></a>枚举摘要</h2><table>
+<thead>
+<tr>
+<th>Enum</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AbstractCircuitBreaker.State.html" target="_blank" rel="noopener">AbstractCircuitBreaker.State</a></td>
+<td>表示断路器不同状态的内部枚举</td>
+</tr>
+</tbody>
+</table>
+<h2 id="异常摘要"><a href="#异常摘要" class="headerlink" title="异常摘要"></a>异常摘要</h2><table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CircuitBreakingException.html" target="_blank" rel="noopener">CircuitBreakingException</a></td>
+<td>用于报告与 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Circuit Breaker</a> 断路器相关的运行时错误条件的异常类</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentException.html" target="_blank" rel="noopener">ConcurrentException</a></td>
+<td>用于报告与访问后台任务数据相关的错误条件的异常类</td>
+</tr>
+<tr>
+<td><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentRuntimeException.html" target="_blank" rel="noopener">ConcurrentRuntimeException</a></td>
+<td>用于报告与访问后台任务数据有关的<strong>运行时</strong>错误条件的异常类</td>
+</tr>
+</tbody>
+</table>
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><h2 id="CircuitBreaker-及其子类"><a href="#CircuitBreaker-及其子类" class="headerlink" title="CircuitBreaker 及其子类"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CircuitBreaker.html" target="_blank" rel="noopener">CircuitBreaker</a><t> 及其子类</t></h2><h3 id="类层次结构"><a href="#类层次结构" class="headerlink" title="类层次结构"></a>类层次结构</h3><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CircuitBreaker.html" target="_blank" rel="noopener">CircuitBreaker</a><t><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AbstractCircuitBreaker.html" target="_blank" rel="noopener">AbstractCircuitBreaker</a><t><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/EventCountCircuitBreaker.html" target="_blank" rel="noopener">EventCountCircuitBreaker</a></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ThresholdCircuitBreaker.html" target="_blank" rel="noopener">ThresholdCircuitBreaker</a></li>
+</ul>
+</t></li>
+</ul>
+</t></li>
+</ul>
+<h3 id="类详细介绍"><a href="#类详细介绍" class="headerlink" title="类详细介绍"></a>类详细介绍</h3><h4 id="CircuitBreaker"><a href="#CircuitBreaker" class="headerlink" title="CircuitBreaker"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CircuitBreaker.html" target="_blank" rel="noopener">CircuitBreaker</a><t></t></h4><p>描述断路器的接口</p>
+<p>一个<strong>断路器</strong>可用来防止不可靠的服务或意外负载的应用程序。 它通常监视特定的资源。 只要这个资源按照预期工作，它就处于<strong>关闭</strong>状态，这意味着资源可以被使用。 如果使用该资源时遇到问题时，断路器可以切换到<strong>打开</strong>状态 。 那么访问这个资源是被禁止的。 根据具体的实施方式，当资源再次可用时，断路器可能切换到<strong>关闭</strong>状态。 </p>
+<p>该接口定义了断路器组件的通用协议</p>
+<h4 id="AbstractCircuitBreaker"><a href="#AbstractCircuitBreaker" class="headerlink" title="AbstractCircuitBreaker"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AbstractCircuitBreaker.html" target="_blank" rel="noopener">AbstractCircuitBreaker</a><t></t></h4><p>断路器的基础类，实现了 <code>CircuitBreaker</code> 大部分接口</p>
+<h4 id="EventCountCircuitBreaker"><a href="#EventCountCircuitBreaker" class="headerlink" title="EventCountCircuitBreaker"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/EventCountCircuitBreaker.html" target="_blank" rel="noopener">EventCountCircuitBreaker</a></h4><p>计算特定事件的断路器模式的简单实现</p>
+<p>一个<strong>断路器</strong>可用来防止不稳定的服务或遭遇意外高峰负载的应用程序。 新创建的<code>EventCountCircuitBreaker</code>对象最初处于<strong>关闭</strong>状态，意味着没有检测到任何问题。 当应用程序遇到特定事件（如错误或服务超时）时，它会通知断路器增加一个内部计数器。 如果在一个特定的时间间隔中报告的事件的数量超过配置的阈值时，断路器将被<strong>打开</strong>。 这意味着相关的子系统有问题； 应用程序不应该再使用它，而是给它一点时间让它安顿下来。 如果接收的事件数量低于阈值，断路器可以配置为在一定的时间之后切换回<strong>关闭</strong>状态。 </p>
+<p>当一个<code>EventCountCircuitBreaker</code>对象被构造时，可以提供下列参数：</p>
+<ul>
+<li>导致状态转换为打开的事件数量的阈值 。 如果在检查间隔内收到事件的数量等于阈值，则断路器将切换到打开状态。 </li>
+<li>检查断路器是否打开的时间间隔。 所以可以指定 「如果在一分钟内遇到 10 个以上的错误，断路器应该打开」。</li>
+<li>自动关闭断路器的阈值。 如 「如果请求数量降低到每分钟 100 次，断路器应该再次自动关闭」。根据使用情况，关闭断路器的门槛略低于打开门槛，以避免在收到的事件数量接近门槛时连续转换。</li>
+</ul>
+<p>构造方法如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// threshold                 改变断路器状态的阈值; 如果在检查间隔内收到的事件数量大于此值,则断路器打开; 如果它低于这个值,它会再次关闭</span></span><br><span class="line"><span class="comment">// checkInterval             打开或关闭断路器的检查间隔</span></span><br><span class="line"><span class="comment">// checkUnit                 checkInterval 的时间单位</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">EventCountCircuitBreaker</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> threshold, <span class="keyword">final</span> <span class="keyword">long</span> checkInterval, <span class="keyword">final</span> TimeUnit checkUnit)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>(threshold, checkInterval, checkUnit, threshold);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// openingThreshold        改变断路器状态的阈值; 如果在检查间隔内收到的事件数量大于此值,则断路器打开</span></span><br><span class="line"><span class="comment">// checkInterval        打开或关闭断路器的检查间隔</span></span><br><span class="line"><span class="comment">// checkUnit            checkInterval 的时间单位</span></span><br><span class="line"><span class="comment">// closingThreshold        关闭断路器的阈值; 如果检查间隔内接收的事件数量低于该阈值,则断路器再次关闭</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">EventCountCircuitBreaker</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> openingThreshold, <span class="keyword">final</span> <span class="keyword">long</span> checkInterval, <span class="keyword">final</span> TimeUnit checkUnit, <span class="keyword">final</span> <span class="keyword">int</span> closingThreshold)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>(openingThreshold, checkInterval, checkUnit, closingThreshold, checkInterval, checkUnit);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// openingThreshold        改变断路器状态的阈值; 如果在检查间隔内收到的事件数量大于此值,则断路器打开</span></span><br><span class="line"><span class="comment">// openingInterval         打开断路器的检查间隔</span></span><br><span class="line"><span class="comment">// openingUnit            checkInterval 的时间单位</span></span><br><span class="line"><span class="comment">// closingThreshold        关闭断路器的阈值; 如果检查间隔内接收的事件数量低于该阈值,则断路器再次关闭</span></span><br><span class="line"><span class="comment">// closingInterval        关闭断路器的时间间隔</span></span><br><span class="line"><span class="comment">// closingUnit            closingInterval 的时间单位</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">EventCountCircuitBreaker</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> openingThreshold, <span class="keyword">final</span> <span class="keyword">long</span> openingInterval, <span class="keyword">final</span> TimeUnit openingUnit, <span class="keyword">final</span> <span class="keyword">int</span> closingThreshold, <span class="keyword">final</span> <span class="keyword">long</span> closingInterval, <span class="keyword">final</span> TimeUnit closingUnit)</span></span>&#123;</span><br><span class="line">    <span class="comment">// 忽略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个类支持以下典型用例：</p>
+<p><strong>防止负载高峰</strong></p>
+<p>想象一下你有一个服务器可以每分钟处理一定数量的请求。 突然之间，请求数量显著增加，可能是遭到 DDoS（拒绝服务攻击）。 <code>EventCountCircuitBreaker</code> 可以配置为在检测到突然的高峰负载时停止应用程序处理请求，并在事情平静时再开始请求处理。 以下代码片段显示了这种情况的典型示例。 这里<code>EventCountCircuitBreaker</code>在断路器打开之前允许每分钟最多 1000 个请求。 当负载再次下降到每秒 800 个请求时，它会切换回关闭状态：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">EventCountCircuitBreaker breaker = <span class="keyword">new</span> EventCountCircuitBreaker(<span class="number">1000</span>, <span class="number">1</span>, TimeUnit.MINUTE, <span class="number">800</span>);</span><br><span class="line"><span class="comment">// something</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">(Request request)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 将监测值增加 1, 并检查该断路器的当前状态是否关闭</span></span><br><span class="line">    <span class="keyword">if</span> (breaker.incrementAndCheckState()) &#123;</span><br><span class="line">        <span class="comment">//实际上处理这个请求</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//做其他事, 例如发送一个错误代码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>处理不稳定的服务</strong></p>
+<p>假如应用程序是一个不稳定的第三方服务。 如果错误太多，服务应被视为关闭，停止服务一段时间。 可以使用以下方式来实现，在这个具体的例子中，我们在 2 分钟内允许 5 个错误； 如果达到这个限制，服务会有 10 分钟的休息时间：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">EventCountCircuitBreaker breaker = <span class="keyword">new</span> EventCountCircuitBreaker(<span class="number">5</span>, <span class="number">2</span>, TimeUnit.MINUTE, <span class="number">5</span>, <span class="number">10</span>, TimeUnit.MINUTE);</span><br><span class="line"><span class="comment">// something</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">(Request request)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 检查断路器是否关闭</span></span><br><span class="line">    <span class="keyword">if</span> (breaker.checkState()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            service.doSomething();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ServiceException ex) &#123;</span><br><span class="line">          <span class="comment">// 将监测值增加 1</span></span><br><span class="line">            breaker.incrementAndCheckState();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 返回错误代码,或使用替代服务</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>除了自动状态转换，断路器的状态可以使用 <code>open()</code>和 <code>close()</code>方法进行手动更改。 同时也可以使用 <code>addChangeListener(final PropertyChangeListener listener)</code> 方法注册监听器，当发生状态转换时，可以得到事件改变对象 <code>PropertyChangeEvent</code>，此时可以根据状态更改的情况做出反应</p>
+<p><em>实现说明：</em></p>
+<ul>
+<li>该实现使用非阻塞算法来更新内部计数器和状态。 如果没有太多的竞争，这应该是非常有效的。 </li>
+<li>这个实现并不打算在非常短的检查间隔中作为高精度定时器来运行。 故意保持简单，以避免复杂和耗时的状态检查。 它应该在几秒到几分钟甚至更长的时间内运行良好。 如果时间间隔太短，可能会因竞争状态导致虚假的状态转换。 </li>
+<li>检查间隔的处理有点简单。 因此，不能保证断路器在特定的时间点被触发； 可能会有一些延迟（小于检查间隔）。 </li>
+</ul>
+<h4 id="ThresholdCircuitBreaker"><a href="#ThresholdCircuitBreaker" class="headerlink" title="ThresholdCircuitBreaker"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ThresholdCircuitBreaker.html" target="_blank" rel="noopener">ThresholdCircuitBreaker</a></h4><p>如果请求的次数大于给定阈值，则会打开 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Circuit Breaker</a> 模式的简单实现。 </p>
+<p>它包含一个从零开始的内部计数器，每次调用将计数器增加一个给定的数量。 如果阈值是零，断路器将永远处于打开状态。 </p>
+<p>一个内存断路器示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> threshold = <span class="number">10L</span>;</span><br><span class="line">ThresholdCircuitBreaker breaker = <span class="keyword">new</span> ThresholdCircuitBreaker(<span class="number">10L</span>);</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleRequest</span><span class="params">(Request request)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> memoryUsed = estimateMemoryUsage(request);</span><br><span class="line">    <span class="keyword">if</span> (breaker.incrementAndCheckState(memoryUsed)) &#123;</span><br><span class="line">        <span class="comment">// 实际上处理这个请求</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 做其他事, 例如发送一个错误代码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Computable-lt-I-O-gt-及其子类"><a href="#Computable-lt-I-O-gt-及其子类" class="headerlink" title="Computable&lt;I,O&gt; 及其子类"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Computable.html" target="_blank" rel="noopener">Computable</a>&lt;I,O&gt; 及其子类</h2><h3 id="类层次结构-1"><a href="#类层次结构-1" class="headerlink" title="类层次结构"></a>类层次结构</h3><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Computable.html" target="_blank" rel="noopener">Computable</a>&lt;I,O&gt; <ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Memoizer.html" target="_blank" rel="noopener">Memoizer</a>&lt;I,O&gt;</li>
+</ul>
+</li>
+</ul>
+<h3 id="类详细介绍-1"><a href="#类详细介绍-1" class="headerlink" title="类详细介绍"></a>类详细介绍</h3><h4 id="Computable-lt-I-O-gt"><a href="#Computable-lt-I-O-gt" class="headerlink" title="Computable&lt;I,O&gt;"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Computable.html" target="_blank" rel="noopener">Computable</a>&lt;I,O&gt;</h4><p>为单个参数的计算定义一个包装的接口，并返回一个结果。 </p>
+<h4 id="Memoizer-lt-I-O-gt"><a href="#Memoizer-lt-I-O-gt" class="headerlink" title="Memoizer&lt;I,O&gt;"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/Memoizer.html" target="_blank" rel="noopener">Memoizer</a>&lt;I,O&gt;</h4><p>为单个参数的计算定义一个包装的接口，并返回一个结果。 计算结果将被缓存</p>
+<p>这不是一个全功能的缓存，一旦生成结果，就无法限制或删除结果。 但是，如果在上一次计算过程中抛出错误，则可以通过在构造方法中设置一个选项来实现重新生成给定参数的结果。 如果没有设置或设置为 false，将抛出缓存的异常</p>
+<h5 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">I</span>, <span class="title">O</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">I</span>, <span class="title">O</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 计算结果缓存</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ConcurrentMap&lt;I, Future&lt;O&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">      <span class="comment">// 构造参数中的 Computable</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;I, O&gt; computable;</span><br><span class="line">      <span class="comment">// 计算发生异常时是否重算</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> recalculate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 Computable 创建对象</span></span><br><span class="line">      <span class="comment">// 如果在计算过程中发生异常,再次计算时会直接抛出异常</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(<span class="keyword">final</span> Computable&lt;I, O&gt; computable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(computable, <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// recalculate 是否重算</span></span><br><span class="line">      <span class="comment">// 如果为 true, 上次计算发生异常时下次计算时重新计算,否则抛出异常</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(<span class="keyword">final</span> Computable&lt;I, O&gt; computable, <span class="keyword">final</span> <span class="keyword">boolean</span> recalculate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.computable = computable;</span><br><span class="line">        <span class="keyword">this</span>.recalculate = recalculate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 计算,并根据参数缓存结果</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> O <span class="title">compute</span><span class="params">(<span class="keyword">final</span> I arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">              <span class="comment">// 获取缓存结果</span></span><br><span class="line">            Future&lt;O&gt; future = cache.get(arg);</span><br><span class="line">              <span class="comment">// 如果缓存为 null</span></span><br><span class="line">            <span class="keyword">if</span> (future == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  <span class="comment">// 创建一个 Callable</span></span><br><span class="line">                <span class="keyword">final</span> Callable&lt;O&gt; eval = <span class="keyword">new</span> Callable&lt;O&gt;() &#123;</span><br><span class="line"></span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> O <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">                          <span class="comment">// 调用构造参数中的 computable 对 arg 进行计算</span></span><br><span class="line">                        <span class="keyword">return</span> computable.compute(arg);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">                  <span class="comment">// 创建 FutureTask</span></span><br><span class="line">                <span class="keyword">final</span> FutureTask&lt;O&gt; futureTask = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                  <span class="comment">// 如果 arg 不存在,添加缓存并返回 null,否则返回缓存中的 Future 对象</span></span><br><span class="line">                  <span class="comment">// 此操作是防止 compute 被并发执行</span></span><br><span class="line">                future = cache.putIfAbsent(arg, futureTask);</span><br><span class="line">                  <span class="comment">// 如果缓存添加成功</span></span><br><span class="line">                <span class="keyword">if</span> (future == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    future = futureTask;</span><br><span class="line">                      <span class="comment">// 运行</span></span><br><span class="line">                    futureTask.run();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                  <span class="comment">// 获取缓存的结果</span></span><br><span class="line">                <span class="keyword">return</span> future.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> CancellationException e) &#123;</span><br><span class="line">                cache.remove(arg, future);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> ExecutionException e) &#123;</span><br><span class="line">                  <span class="comment">// 如果设置了重新计算</span></span><br><span class="line">                <span class="keyword">if</span> (recalculate) &#123;</span><br><span class="line">                      <span class="comment">// 删除缓存</span></span><br><span class="line">                    cache.remove(arg, future);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 抛出异常</span></span><br><span class="line">                <span class="keyword">throw</span> launderException(e.getCause());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">// 异常处理</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> RuntimeException <span class="title">launderException</span><span class="params">(<span class="keyword">final</span> Throwable throwable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (throwable <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) throwable;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (throwable <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) throwable;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unchecked exception"</span>, throwable);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="ConcurrentInitializer-及其子类"><a href="#ConcurrentInitializer-及其子类" class="headerlink" title="ConcurrentInitializer 及其子类"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentInitializer.html" target="_blank" rel="noopener">ConcurrentInitializer</a><t> 及其子类</t></h2><h3 id="类层次结构-2"><a href="#类层次结构-2" class="headerlink" title="类层次结构"></a>类层次结构</h3><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentInitializer.html" target="_blank" rel="noopener">ConcurrentInitializer</a><t><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicInitializer.html" target="_blank" rel="noopener">AtomicInitializer</a><t></t></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicSafeInitializer.html" target="_blank" rel="noopener">AtomicSafeInitializer</a><t></t></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConstantInitializer.html" target="_blank" rel="noopener">ConstantInitializer</a><t></t></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/LazyInitializer.html" target="_blank" rel="noopener">LazyInitializer</a><t></t></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BackgroundInitializer.html" target="_blank" rel="noopener">BackgroundInitializer</a><t><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CallableBackgroundInitializer.html" target="_blank" rel="noopener">CallableBackgroundInitializer</a><t></t></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/MultiBackgroundInitializer.html" target="_blank" rel="noopener">MultiBackgroundInitializer</a></li>
+</ul>
+</t></li>
+</ul>
+</t></li>
+</ul>
+<h3 id="类详细介绍-2"><a href="#类详细介绍-2" class="headerlink" title="类详细介绍"></a>类详细介绍</h3><p>ConcurrentInitializer 及其子类主要是用来进行数据安全初始化的，开头的 Concurrent 表示支持并发操作</p>
+<p>它只定义了一个接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">   <span class="function">T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用 <code>get()</code> 方法即可获取完成初始化的对象.同时提供了多种实现，可根据需要进行选择</p>
+<h4 id="ConstantInitializer"><a href="#ConstantInitializer" class="headerlink" title="ConstantInitializer"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConstantInitializer.html" target="_blank" rel="noopener">ConstantInitializer</a><t></t></h4><h5 id="功能描述"><a href="#功能描述" class="headerlink" title="功能描述"></a>功能描述</h5><p>ConstantInitializer 是最简单的 ConcurrentInitializer 实现</p>
+<p>在构造器中传入一个对象，在它的 <code>get()</code> 方法中直接返回这个对象.适用于单元测试及替换其他实现类</p>
+<h5 id="源码分析-1"><a href="#源码分析-1" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConstantInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T object;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConstantInitializer</span><span class="params">(<span class="keyword">final</span> T obj)</span> </span>&#123;</span><br><span class="line">        object = obj;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">getObject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> object;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentInitializer&lt;String&gt; initializer = <span class="keyword">new</span> ConstantInitializer&lt;&gt;(<span class="string">"test"</span>);</span><br><span class="line">initializer.get();    <span class="comment">//返回 test</span></span><br></pre></td></tr></table></figure>
+<h4 id="LazyInitializer"><a href="#LazyInitializer" class="headerlink" title="LazyInitializer"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/LazyInitializer.html" target="_blank" rel="noopener">LazyInitializer</a><t></t></h4><h5 id="功能描述-1"><a href="#功能描述-1" class="headerlink" title="功能描述"></a>功能描述</h5><p>顾名思义，使用懒加载的方式进行初始化，只有在第一次调用时才进行初始化操作，通过实现 <code>initialize</code> 方法返回初始化后的对象</p>
+<h5 id="源码分析-2"><a href="#源码分析-2" class="headerlink" title="源码分析"></a>源码分析</h5><p>使用<strong>双重检查锁</strong>进行实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object NO_INIT = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 使用 volatile 修饰符,保持 object 在多线程情况下的可见性</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> T object = (T) NO_INIT;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 创建返回对象,并赋值为 object</span></span><br><span class="line">        T result = object;</span><br><span class="line">        <span class="comment">// 如果 result 等于 NO_INIT, 表明 object 对象未被更改过</span></span><br><span class="line">        <span class="keyword">if</span> (result == NO_INIT) &#123;</span><br><span class="line">              <span class="comment">// 加锁</span></span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                  <span class="comment">// 重新将 object 赋值给 result</span></span><br><span class="line">                result = object;</span><br><span class="line">                  <span class="comment">// 如果 result 依然等于 NO_INIT,表明当前线程是第一个获取到锁的线程</span></span><br><span class="line">                  <span class="comment">// 否者表明在等待获取锁的时间已经有其他线程对 result 进行了更改</span></span><br><span class="line">                <span class="keyword">if</span> (result == NO_INIT) &#123;</span><br><span class="line">                      <span class="comment">// 调用子类的 initialize 方法并赋值给 result,object</span></span><br><span class="line">                    object = result = initialize();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-1"><a href="#代码示例-1" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentInitializer&lt;Properties&gt; initializer = <span class="keyword">new</span> LazyInitializer&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Properties <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">initializer.get();</span><br></pre></td></tr></table></figure>
+<h4 id="AtomicInitializer"><a href="#AtomicInitializer" class="headerlink" title="AtomicInitializer"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicInitializer.html" target="_blank" rel="noopener">AtomicInitializer</a><t></t></h4><h5 id="功能描述-2"><a href="#功能描述-2" class="headerlink" title="功能描述"></a>功能描述</h5><p>与 LazyInitializer 功能，用法一致，不过实现方式不同，同时其 <code>initialize</code> 方法会存在调用多次的问题</p>
+<h5 id="源码分析-3"><a href="#源码分析-3" class="headerlink" title="源码分析"></a>源码分析</h5><p>使用 <strong>CAS</strong> 方式进行实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AtomicInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 初始化一个 AtomicReference 对象,可以以原子方式更新对象引用</span></span><br><span class="line">      <span class="comment">// 默认引用值为 null</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;T&gt; reference = <span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">          <span class="comment">// 获取引用值</span></span><br><span class="line">        T result = reference.get();</span><br><span class="line">        <span class="comment">// 如果为 null,表明对象引用未被设置</span></span><br><span class="line">          <span class="comment">// 否者表明该对象引用已经被设置,即被初始化</span></span><br><span class="line">        <span class="keyword">if</span> (result == <span class="keyword">null</span>) &#123;</span><br><span class="line">              <span class="comment">// 调用 initialize 进行初始化</span></span><br><span class="line">              <span class="comment">// 假如多个线程同时执行到这一步,会导致 initialize 方法被调用多次</span></span><br><span class="line">            result = initialize();</span><br><span class="line">              <span class="comment">// 使用 CAS 的方式修改引用值,该应用旧值为 null,新值为初始化后返回的 result</span></span><br><span class="line">              <span class="comment">// 如果更新成功,直接返回 result 对象</span></span><br><span class="line">            <span class="keyword">if</span> (!reference.compareAndSet(<span class="keyword">null</span>, result)) &#123;</span><br><span class="line">                <span class="comment">// 如果更新失败,表示有其他线程更新成功,通过 reference.get() 方法可获取其他线程设置的值</span></span><br><span class="line">                result = reference.get();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-2"><a href="#代码示例-2" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentInitializer&lt;Properties&gt; initializer = <span class="keyword">new</span> AtomicInitializer&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Properties <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">initializer.get();</span><br></pre></td></tr></table></figure>
+<h4 id="AtomicSafeInitializer"><a href="#AtomicSafeInitializer" class="headerlink" title="AtomicSafeInitializer"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/AtomicSafeInitializer.html" target="_blank" rel="noopener">AtomicSafeInitializer</a><t></t></h4><h5 id="功能描述-3"><a href="#功能描述-3" class="headerlink" title="功能描述"></a>功能描述</h5><p>AtomicInitializer 存在一个 <code>initialize</code> 执行多次的问题.而 AtomicSafeInitializer 则是为了解决这个问题而诞生，使用它，<code>initialize</code> 只会被执行一次</p>
+<h5 id="源码分析-4"><a href="#源码分析-4" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AtomicSafeInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span></span></span><br><span class="line"><span class="class">        <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 一个 AtomicReference 变量,用于保证 initialize 只会被调用一次</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;AtomicSafeInitializer&lt;T&gt;&gt; factory = <span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;T&gt; reference = <span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">        T result;</span><br><span class="line">        <span class="comment">// 获取引用</span></span><br><span class="line">          <span class="comment">// 如果引用为 null,进入初始化步骤</span></span><br><span class="line">        <span class="keyword">while</span> ((result = reference.get()) == <span class="keyword">null</span>) &#123;</span><br><span class="line">              <span class="comment">// 操作 factory 更新引用,在多线程的情况下,只有一个线程能执行成功</span></span><br><span class="line">              <span class="comment">// 如果更新成功,当前线程进行初始化,并将返回结果设置为 reference 的引用</span></span><br><span class="line">              <span class="comment">// 如果更新失败,在 while 中重新获取 reference 的引用,直到更新成功的那个线程为 reference 设置新值</span></span><br><span class="line">            <span class="keyword">if</span> (factory.compareAndSet(<span class="keyword">null</span>, <span class="keyword">this</span>)) &#123;</span><br><span class="line">                reference.set(initialize());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-3"><a href="#代码示例-3" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentInitializer&lt;Properties&gt; initializer = <span class="keyword">new</span> AtomicSafeInitializer&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Properties <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">initializer.get();</span><br></pre></td></tr></table></figure>
+<h4 id="BackgroundInitializer"><a href="#BackgroundInitializer" class="headerlink" title="BackgroundInitializer "></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BackgroundInitializer.html" target="_blank" rel="noopener">BackgroundInitializer</a> <t></t></h4><h5 id="功能描述-4"><a href="#功能描述-4" class="headerlink" title="功能描述"></a>功能描述</h5><p>使用后台线程进行初始化，在创建对象后需要先执行 <code>start()</code> 保证后台线程运行，再调用 <code>get()</code> 方法</p>
+<p>默认<code>Executors.newFixedThreadPool(1)</code> 创建一个线程数量为 1 的线程池，在 <code>initialize</code> 方法执行完成之后对线程池进行关闭</p>
+<p>同时提供一个 <code>protected BackgroundInitializer(final ExecutorService exec) {}</code> 构造器方法，此时使用传入的 <code>ExecutorService</code> 对象执行 <code>initialize</code> 方法，执行完成后不会该关闭线程池</p>
+<h5 id="源码分析-5"><a href="#源码分析-5" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">BackgroundInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span></span></span><br><span class="line"><span class="class">        <span class="title">ConcurrentInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 构造器传入的 ExecutorService 对象</span></span><br><span class="line">    <span class="keyword">private</span> ExecutorService externalExecutor; </span><br><span class="line">    <span class="comment">// 默认生成的 ExecutorService 对象</span></span><br><span class="line">    <span class="keyword">private</span> ExecutorService executor; </span><br><span class="line">    <span class="comment">// 异步计算的结果</span></span><br><span class="line">    <span class="keyword">private</span> Future&lt;T&gt; future;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">BackgroundInitializer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(<span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ExecutorService 参数构造器,使用传入的 ExecutorService 执行 initialize</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">BackgroundInitializer</span><span class="params">(<span class="keyword">final</span> ExecutorService exec)</span> </span>&#123;</span><br><span class="line">        setExternalExecutor(exec);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 判断后台线程是否运行</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">isStarted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> future != <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 后台线程是否启动</span></span><br><span class="line">        <span class="keyword">if</span> (!isStarted()) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 定义一个临时线程池变量</span></span><br><span class="line">            ExecutorService tempExec;</span><br><span class="line">              <span class="comment">// 获取构造器传入的 ExecutorService 对象</span></span><br><span class="line">            executor = getExternalExecutor();</span><br><span class="line">              <span class="comment">// 如果 executor 为 null,使用无参构造器创建 BackgroundInitializer</span></span><br><span class="line">            <span class="keyword">if</span> (executor == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  <span class="comment">// 创建一个线程数量为1的线程池对象,在使用完成后进行关闭</span></span><br><span class="line">                executor = tempExec = createExecutor();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                tempExec = <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 后台执行初始化</span></span><br><span class="line">            future = executor.submit(createTask(tempExec));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 获取初始化结果</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> getFuture().get();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> ExecutionException execex) &#123;</span><br><span class="line">            ConcurrentUtils.handleCause(execex);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> InterruptedException iex) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentException(iex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Future&lt;T&gt; <span class="title">getFuture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (future == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"start() must be called first!"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> future;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Callable&lt;T&gt; <span class="title">createTask</span><span class="params">(<span class="keyword">final</span> ExecutorService execDestroy)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> InitializationTask(execDestroy);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> ExecutorService <span class="title">createExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Executors.newFixedThreadPool(getTaskCount());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">InitializationTask</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> ExecutorService execFinally;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// ExecutorService 参数构造器,用来关闭默认创建的 ExecutorService 对象</span></span><br><span class="line">        InitializationTask(<span class="keyword">final</span> ExecutorService exec) &#123;</span><br><span class="line">            execFinally = exec;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> T <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                  <span class="comment">// 执行子类初始化方法</span></span><br><span class="line">                <span class="keyword">return</span> initialize();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                  <span class="comment">// 如果构造参数中的 ExecutorService 不为 null,进行关闭</span></span><br><span class="line">                  <span class="comment">// 只有使用 BackgroundInitializer() 创建对象才存在这种情况</span></span><br><span class="line">                <span class="keyword">if</span> (execFinally != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    execFinally.shutdown();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-4"><a href="#代码示例-4" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BackgroundInitializer&lt;Properties&gt; initializer = <span class="keyword">new</span> BackgroundInitializer&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Properties <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> ConcurrentException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">initializer.start();</span><br><span class="line">initializer.get();</span><br></pre></td></tr></table></figure>
+<h4 id="CallableBackgroundInitializer"><a href="#CallableBackgroundInitializer" class="headerlink" title="CallableBackgroundInitializer "></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/CallableBackgroundInitializer.html" target="_blank" rel="noopener">CallableBackgroundInitializer</a> <t></t></h4><h5 id="功能描述-5"><a href="#功能描述-5" class="headerlink" title="功能描述"></a>功能描述</h5><p>BackgroundInitializer 的子类，使用方式为在构造器中传入一个 <code>Callable</code> 对象，在初始化时调用该参数的 <code>call()</code> 方法</p>
+<h5 id="源码分析-6"><a href="#源码分析-6" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CallableBackgroundInitializer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">BackgroundInitializer</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 构造参数中的 Callable</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Callable&lt;T&gt; callable;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CallableBackgroundInitializer</span><span class="params">(<span class="keyword">final</span> Callable&lt;T&gt; call)</span> </span>&#123;</span><br><span class="line">        checkCallable(call);</span><br><span class="line">        callable = call;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CallableBackgroundInitializer</span><span class="params">(<span class="keyword">final</span> Callable&lt;T&gt; call, <span class="keyword">final</span> ExecutorService exec)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(exec);</span><br><span class="line">        checkCallable(call);</span><br><span class="line">        callable = call;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> T <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> callable.call();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">checkCallable</span><span class="params">(<span class="keyword">final</span> Callable&lt;T&gt; call)</span> </span>&#123;</span><br><span class="line">        Validate.isTrue(call != <span class="keyword">null</span>, <span class="string">"Callable must not be null!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-5"><a href="#代码示例-5" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BackgroundInitializer&lt;Properties&gt; initializer = <span class="keyword">new</span> CallableBackgroundInitializer&lt;&gt;(<span class="keyword">new</span> Callable&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Properties <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line">initializer.start();</span><br><span class="line">initializer.get();</span><br></pre></td></tr></table></figure>
+<h4 id="MultiBackgroundInitializer"><a href="#MultiBackgroundInitializer" class="headerlink" title="MultiBackgroundInitializer"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/MultiBackgroundInitializer.html" target="_blank" rel="noopener">MultiBackgroundInitializer</a></h4><h5 id="功能描述-6"><a href="#功能描述-6" class="headerlink" title="功能描述"></a>功能描述</h5><p>BackgroundInitializer 多后台任务的实现，通过该类，可以并行执行多个 BackgroundInitializer</p>
+<h5 id="源码分析-7"><a href="#源码分析-7" class="headerlink" title="源码分析"></a>源码分析</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MultiBackgroundInitializer</span></span></span><br><span class="line"><span class="class">        <span class="keyword">extends</span></span></span><br><span class="line"><span class="class">        <span class="title">BackgroundInitializer</span>&lt;<span class="title">MultiBackgroundInitializer</span>.<span class="title">MultiBackgroundInitializerResults</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 需要执行的多个 BackgroundInitializer Map, String 为 BackgroundInitializer 的名称</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, BackgroundInitializer&lt;?&gt;&gt; childInitializers =</span><br><span class="line">        <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MultiBackgroundInitializer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MultiBackgroundInitializer</span><span class="params">(<span class="keyword">final</span> ExecutorService exec)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(exec);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加一个需要执行的 BackgroundInitializer</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addInitializer</span><span class="params">(<span class="keyword">final</span> String name, <span class="keyword">final</span> BackgroundInitializer&lt;?&gt; init)</span> </span>&#123;</span><br><span class="line">        Validate.isTrue(name != <span class="keyword">null</span>, <span class="string">"Name of child initializer must not be null!"</span>);</span><br><span class="line">        Validate.isTrue(init != <span class="keyword">null</span>, <span class="string">"Child initializer must not be null!"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (isStarted()) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                        <span class="string">"addInitializer() must not be called after start()!"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            childInitializers.put(name, init);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回默认线程池的构建数量</span></span><br><span class="line">      <span class="comment">// 默认情况下所有 BackgroundInitializer 与 MultiBackgroundInitializer 共享同一个线程池</span></span><br><span class="line">      <span class="comment">// 数量为 1 + 所有 BackgroundInitializer 的数量</span></span><br><span class="line">      <span class="comment">// 1 为 MultiBackgroundInitializer 后台执行的线程数</span></span><br><span class="line">      <span class="comment">// 理论上所有的 BackgroundInitializer 都是并行执行,不需要等待其他对象初始化完毕</span></span><br><span class="line">      <span class="comment">// 但是在构造参数中传入 ExecutorService 例外</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getTaskCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> result = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">final</span> BackgroundInitializer&lt;?&gt; bi : childInitializers.values()) &#123;</span><br><span class="line">            result += bi.getTaskCount();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 多任务的初始化方法</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> MultiBackgroundInitializerResults <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Map&lt;String, BackgroundInitializer&lt;?&gt;&gt; inits;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="comment">// 创建一个 childInitializers 对象快照</span></span><br><span class="line">            inits = <span class="keyword">new</span> HashMap&lt;&gt;(</span><br><span class="line">                    childInitializers);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 启动所有的 BackgroundInitializer</span></span><br><span class="line">        <span class="keyword">final</span> ExecutorService exec = getActiveExecutor();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">final</span> BackgroundInitializer&lt;?&gt; bi : inits.values()) &#123;</span><br><span class="line">              <span class="comment">// 如果 BackgroundInitializer 没有外部 ExecutorService</span></span><br><span class="line">            <span class="keyword">if</span> (bi.getExternalExecutor() == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// 使用 MultiBackgroundInitializer 默认的 ExecutorService</span></span><br><span class="line">                bi.setExternalExecutor(exec);</span><br><span class="line">            &#125;</span><br><span class="line">            bi.start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// BackgroundInitializer 名称与初始化值 Map</span></span><br><span class="line">        <span class="keyword">final</span> Map&lt;String, Object&gt; results = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">          <span class="comment">// BackgroundInitializer 名称与异常 Map</span></span><br><span class="line">        <span class="keyword">final</span> Map&lt;String, ConcurrentException&gt; excepts = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">final</span> Map.Entry&lt;String, BackgroundInitializer&lt;?&gt;&gt; e : inits.entrySet()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                results.put(e.getKey(), e.getValue().get());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> ConcurrentException cex) &#123;</span><br><span class="line">                excepts.put(e.getKey(), cex);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 构建多 BackgroundInitializer 结果对象</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> MultiBackgroundInitializerResults(inits, results, excepts);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 多 BackgroundInitializer 结果对象</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MultiBackgroundInitializerResults</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, BackgroundInitializer&lt;?&gt;&gt; initializers;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; resultObjects;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, ConcurrentException&gt; exceptions;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">MultiBackgroundInitializerResults</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">final</span> Map&lt;String, BackgroundInitializer&lt;?&gt;&gt; inits,</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">final</span> Map&lt;String, Object&gt; results,</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">final</span> Map&lt;String, ConcurrentException&gt; excepts)</span> </span>&#123;</span><br><span class="line">            initializers = inits;</span><br><span class="line">            resultObjects = results;</span><br><span class="line">            exceptions = excepts;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> BackgroundInitializer&lt;?&gt; getInitializer(<span class="keyword">final</span> String name) &#123;</span><br><span class="line">            <span class="keyword">return</span> checkName(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Object <span class="title">getResultObject</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line">            checkName(name);</span><br><span class="line">            <span class="keyword">return</span> resultObjects.get(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isException</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line">            checkName(name);</span><br><span class="line">            <span class="keyword">return</span> exceptions.containsKey(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> ConcurrentException <span class="title">getException</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line">            checkName(name);</span><br><span class="line">            <span class="keyword">return</span> exceptions.get(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Set&lt;String&gt; <span class="title">initializerNames</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> Collections.unmodifiableSet(initializers.keySet());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 是否全部成功</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isSuccessful</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> exceptions.isEmpty();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> BackgroundInitializer&lt;?&gt; checkName(<span class="keyword">final</span> String name) &#123;</span><br><span class="line">            <span class="keyword">final</span> BackgroundInitializer&lt;?&gt; init = initializers.get(name);</span><br><span class="line">            <span class="keyword">if</span> (init == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException(</span><br><span class="line">                        <span class="string">"No child initializer with name "</span> + name);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> init;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="代码示例-6"><a href="#代码示例-6" class="headerlink" title="代码示例"></a>代码示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">MultiBackgroundInitializer initializer = <span class="keyword">new</span> MultiBackgroundInitializer();</span><br><span class="line">initializer.addInitializer(<span class="string">"loadProperties1"</span>, <span class="keyword">new</span> BackgroundInitializer&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Properties <span class="title">initialize</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties1();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line">initializer.addInitializer(<span class="string">"loadProperties2"</span>, <span class="keyword">new</span> CallableBackgroundInitializer&lt;Properties&gt;(<span class="keyword">new</span> Callable&lt;Properties&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Properties <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> loadProperties2();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;));</span><br><span class="line">initializer.start();</span><br><span class="line">MultiBackgroundInitializer.MultiBackgroundInitializerResults results = initializer.get();</span><br><span class="line"><span class="keyword">if</span> (results.isSuccessful()) &#123;</span><br><span class="line">  results.getResultObject(<span class="string">"loadProperties1"</span>);</span><br><span class="line">  results.getResultObject(<span class="string">"loadProperties2"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用选择"><a href="#使用选择" class="headerlink" title="使用选择"></a>使用选择</h3><p>如果初始化程序执行时间过长且不希望在第一次调用时等待太久请选择 <code>BackgroundInitializer</code> 与 <code>CallableBackgroundInitializer</code></p>
+<p>否则使用 <code>LazyInitializer</code> 与 <code>AtomicSafeInitializer</code></p>
+<h2 id="BasicThreadFactory"><a href="#BasicThreadFactory" class="headerlink" title="BasicThreadFactory"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/BasicThreadFactory.html" target="_blank" rel="noopener">BasicThreadFactory</a></h2><p><code>ThreadFactory</code> 接口的实现，，提供一些配置获取方法</p>
+<p><code>ThreadFactory</code> 用于 <code>ExecutorService</code> 创建执行任务的线程。 在许多情况下，用户并不关心，因为 <code>ExecutorService</code> 会使用一个默认的 <code>ThreadFactory</code>  。 但是，如果对线程有特殊要求，则必须创建一个自定义的<code>ThreadFactory</code></p>
+<p>这个类为它创建的线程提供了一些经常需要的配置选项，这些是：</p>
+<ul>
+<li><code>namingPattern</code> 线程的名称模式。 如果希望日志输出或异常跟踪更容易阅读，可以为线程起一个有意义的名称。 在线程命名时使用 <code>thread.setName(String.format(namingPattern, count));</code> 方式，<code>count</code> 即线程池当前创建的线程数量，从 1 开始。  <code>namingPattern</code> 中的 <code>%d</code> 会被替换为 <code>count</code> 。 如 ： <code>namingPattern</code> 为 <code>&quot;My %d. worker thread&quot;</code>，那么生成的线程名称为 <code>&quot;My 1. worker thread&quot;</code>，<code>&quot;My 2. worker thread&quot;</code> </li>
+<li><code>daemonFlag</code> 守护线程标志。 该工厂创建的线程是否是守护线程。 这会影响当前 Java 应用程序的退出行为，当正在运行的线程都是守护线程时，Java 虚拟机将退出，默认为 false ，即用户线程</li>
+<li><code>priority</code> 线程的优先级.  <code>Integer</code> 类型,值区间为 <strong>[1,10]</strong></li>
+<li><code>uncaughtExceptionHandler</code> 线程由于未捕获到异常而突然终止时调用的处理程序。 如果线程内发生未捕获的异常，则调用此处理程序</li>
+</ul>
+<p><code>BasicThreadFactory</code>不是直接创建实例，而是使用内部类 <code>Builder</code>类实现此目的，使用 <code>Builder</code> 只需要设置应用程序感兴趣的配置选项。 以下示例显示了 <code>BasicThreadFactory</code>是如何创建并配置在在<code>ExecutorService</code>中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个线程工厂,配置名称模式,守护线程标志,优先级</span></span><br><span class="line">BasicThreadFactory factory = <span class="keyword">new</span> BasicThreadFactory.Builder()</span><br><span class="line">    .namingPattern(<span class="string">"workerthread-%d"</span>)</span><br><span class="line">    .daemon(<span class="keyword">true</span>)</span><br><span class="line">    .priority(Thread.MAX_PRIORITY)</span><br><span class="line">    .build();</span><br><span class="line"><span class="comment">// 创建一个单线程的线程池,指定 factory 为线程工厂</span></span><br><span class="line">ExecutorService exec = Executors.newSingleThreadExecutor(factory);</span><br></pre></td></tr></table></figure>
+<h2 id="ConcurrentUtils"><a href="#ConcurrentUtils" class="headerlink" title="ConcurrentUtils"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/ConcurrentUtils.html" target="_blank" rel="noopener">ConcurrentUtils</a></h2><p>提供 <code>java.util.concurrent</code> 包相关功能的工具方法</p>
+<p>该类涉及到 <code>ConcurrentException</code> 的方法存在一个 <code>原方法名+Unchecked</code> 的相同功能方法，用于将受检异常 <code>ConcurrentException</code> 转换为运行时异常 <code>ConcurrentRuntimeException</code></p>
+<p>用法如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;Object&gt; future = ...;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  Object result = future.get();</span><br><span class="line">  ...</span><br><span class="line">&#125; <span class="keyword">catch</span> (ExecutionException eex) &#123;</span><br><span class="line">  ConcurrentUtils.handleCause(eex);</span><br><span class="line">  <span class="comment">// ConcurrentUtils.handleCauseUnchecked(eex);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="方法列表"><a href="#方法列表" class="headerlink" title="方法列表"></a>方法列表</h3><table>
+<thead>
+<tr>
+<th>Modifier and Type</th>
+<th>Method and Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>static &lt;T&gt; Future&lt;T&gt;</code></td>
+<td><code>constantFuture(T value)</code><br>创建一个已完成的 <code>Future</code> ,该  <code>Future</code> 的返回值及参数中的 <code>T value</code></td>
+</tr>
+<tr>
+<td><code>static &lt;K,V&gt; V</code></td>
+<td><code>createIfAbsent(ConcurrentMap&lt;K,V&gt; map, K key, ConcurrentInitializer&lt;V&gt; init)</code><br>检查 <code>ConcurrentMap</code> 是否包含 <code>key</code>,如果未包含,为 <code>ConcurrentMap</code> 设置 <code>key</code> : <code>init.get()</code></td>
+</tr>
+<tr>
+<td><code>static &lt;K,V&gt; V</code></td>
+<td><code>createIfAbsentUnchecked(ConcurrentMap&lt;K,V&gt; map, K key, ConcurrentInitializer&lt;V&gt; init)</code><br><code>createIfAbsent</code> 的非受检异常版本</td>
+</tr>
+<tr>
+<td><code>static ConcurrentException</code></td>
+<td><code>extractCause(ExecutionException ex)</code><br><code>ExecutionException</code> 异常原因转换, <code>RuntimeException</code> 与 <code>Error</code> 进行抛出,否则转换为受检异常 <code>ConcurrentException</code> 并返回</td>
+</tr>
+<tr>
+<td><code>static ConcurrentRuntimeException</code></td>
+<td><code>extractCauseUnchecked(ExecutionException ex)</code><br><code>extractCause</code> 的非受检异常版本</td>
+</tr>
+<tr>
+<td><code>static void</code></td>
+<td><code>handleCause(ExecutionException ex)</code><br><code>ExecutionException</code> 异常处理,<code>RuntimeException</code> 与 <code>Error</code> 进行抛出,否则转换为 <code>ConcurrentException</code> 在进行抛出</td>
+</tr>
+<tr>
+<td><code>static void</code></td>
+<td><code>handleCauseUnchecked(ExecutionException ex)</code><br><code>handleCauseUnchecked</code> 的非受检异常版本</td>
+</tr>
+<tr>
+<td><code>static &lt;T&gt; T</code></td>
+<td><code>initialize(ConcurrentInitializer&lt;T&gt; initializer)</code><br>获取 <code>initializer</code> 的初始化返回值</td>
+</tr>
+<tr>
+<td><code>static &lt;T&gt; T</code></td>
+<td><code>initializeUnchecked(ConcurrentInitializer&lt;T&gt; initializer)</code><br><code>initialize</code> 的非受检异常版本</td>
+</tr>
+<tr>
+<td><code>static &lt;K,V&gt; V</code></td>
+<td><code>putIfAbsent(ConcurrentMap&lt;K,V&gt; map, K key, V value)</code><br>检查 <code>ConcurrentMap</code> 是否包含 <code>key</code>,如果未包含,为 <code>ConcurrentMap</code> 设置 <code>key</code> : <code>value</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="TimedSemaphore"><a href="#TimedSemaphore" class="headerlink" title="TimedSemaphore"></a><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/concurrent/TimedSemaphore.html" target="_blank" rel="noopener">TimedSemaphore</a></h2><p>一个专门的信号量实现，在给定的时间内提供许可，到期自动释放</p>
+<p>该类的功能与 <code>java.util.concurrent.Semaphore</code> 有点类似，通过调用 <code>acquire()</code> 方法获取许可，但是没有提供 <code>release()</code> 方法进行许可释放，因为它会在时间到期后释放所有的许可</p>
+<p>如果在许可已经用尽的情况下调用<code>acquire()</code>，那么当前线程会一直阻塞，直到时间到期，所有许可被释放.此时再重新获取许可.这意味着可以在<strong>规定的时间范围内，限制给定操作的次数</strong></p>
+<p>用法示例</p>
+<p>假如存在一个通过后台线程查询数据库以进行收集统计信息的应用程序.这种后台处理不应该对数据库产生太多负载，防止影响系统的功能和性能.所以可以使用 <code>TimedSemaphore</code> 来限制该线程每秒只能发出一定数量的数据库查询</p>
+<p>执行查询的线程类伪代码可能如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StatisticsThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 限制数据库查询次数的 semaphore 对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> TimedSemaphore semaphore;</span><br><span class="line">    <span class="comment">// 创建一个线程实例并设置 semaphore 对象</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">StatisticsThread</span><span class="params">(TimedSemaphore timedSemaphore)</span> </span>&#123;</span><br><span class="line">        semaphore = timedSemaphore;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 收集统计信息</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                semaphore.acquire();   <span class="comment">// 限制数据库查询</span></span><br><span class="line">                performQuery();        <span class="comment">// 发出查询</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span>(InterruptedException) &#123;</span><br><span class="line">            <span class="comment">// fall through</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面的代码片段显示了如何创建一个每秒只允许 10 次的 <code>TimedSemaphore</code> 并传递给统计线程 <code>StatisticsThread</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TimedSemaphore sem = <span class="keyword">new</span> TimedSemaphore(<span class="number">1</span>, TimeUnit.SECONDS, <span class="number">10</span>);</span><br><span class="line">StatisticsThread thread = <span class="keyword">new</span> StatisticsThread(sem);</span><br><span class="line">thread.start();</span><br></pre></td></tr></table></figure>
+<p>构造方法如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// timePeriod             时间段</span></span><br><span class="line"><span class="comment">// timeUnit        时间单位,如 SECONDS 秒,MILLISECONDS 毫秒,MINUTES 分</span></span><br><span class="line"><span class="comment">// limit         许可数量</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">TimedSemaphore</span><span class="params">(<span class="keyword">final</span> <span class="keyword">long</span> timePeriod, <span class="keyword">final</span> TimeUnit timeUnit, <span class="keyword">final</span> <span class="keyword">int</span> limit)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// service        延迟线程池,会使用该线程池创建释放许可的周期任务</span></span></span><br><span class="line"><span class="function"><span class="comment">// timePeriod             时间段</span></span></span><br><span class="line"><span class="function"><span class="comment">// timeUnit        时间单位,如 SECONDS 秒,MILLISECONDS 毫秒,MINUTES 分</span></span></span><br><span class="line"><span class="function"><span class="comment">// limit         许可数量</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">TimedSemaphore</span><span class="params">(<span class="keyword">final</span> ScheduledExecutorService service, <span class="keyword">final</span> <span class="keyword">long</span> timePeriod,<span class="keyword">final</span> TimeUnit timeUnit, <span class="keyword">final</span> <span class="keyword">int</span> limit)</span></span></span><br></pre></td></tr></table></figure>
+<p>所以 <code>new TimedSemaphore(1, TimeUnit.SECOND, 10);</code>  含义是在 <code>timePeriod(1) * timeUnit(TimeUnit.SECOND) = 1秒</code> 的时间内只发放 <code>limit(10)</code> 个许可</p>
+<p>在使用时需要在限制操作前调用 <code>acquire()</code>方法。 <code>TimedSemaphore</code> 会统计调用 <code>acquire()</code> 的次数，并在许可达到上限后阻塞当前线程，直到时间周期结束后释放所有许可，此时再进行许可获取</p>
+<p>另外提供 <code>tryAcquire()</code> 方法，该方法尝试获取许可，如果获取成功，返回<code>true</code>，否者返回<code>false</code> ，使用这种方法不会造成当前线程的阻塞</p>
+<p>同时在运行过程中你可以随时调用 <code>setLimit(final int limit)</code> 修改许可数量。 如果一个操作的次数限制需要动态调整，比如白天减少许可，晚上增加许可。 如果设置的许可小于原本许可，那么会立即生效，但是设置的许可大于原来的许可，阻塞的线程依然阻塞，直到所有许可释放，阻塞的线程被唤醒.此时按照新设置的许可进行处理.如果许可数量设置小于等于 0，那么 <code>acquire()</code> 操作不会阻塞，直接放行</p>
+<p>当<code>TimedSemaphore</code> 不需要时，可以调用 <code>shutdown()</code> 方法，该方法会取消释放所有许可的周期任务，如果执行周期任务的 <code>ScheduledExecutorService</code> 不是外部传入，同时也会结束该线程池</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://commons.apache.org/proper/commons-lang/" target="_blank" rel="noopener">Apache Commons Lang</a></li>
+<li><a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/index.html" target="_blank" rel="noopener">Apache Commons Lang Javadoc </a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Common-Lang/" rel="tag"># Common Lang</a>
+          
+            <a href="/tags/源码研究/" rel="tag"># 源码研究</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/13/IntelliJ-IDEA-使用-FindBugs-进行代码分析/" rel="next" title="IntelliJ IDEA 使用 FindBugs 进行代码分析">
+                <i class="fa fa-chevron-left"></i> IntelliJ IDEA 使用 FindBugs 进行代码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/25/Spring-Boot项目启动异常时使用邮件通知/" rel="prev" title="Spring Boot 项目启动异常时使用邮件通知">
+                Spring Boot 项目启动异常时使用邮件通知 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引入-jar-包"><span class="nav-number">1.</span> <span class="nav-text">引入 jar 包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Maven"><span class="nav-number">1.1.</span> <span class="nav-text">Maven</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gradle"><span class="nav-number">1.2.</span> <span class="nav-text">Gradle</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#包结构说明"><span class="nav-number">2.</span> <span class="nav-text">包结构说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接口摘要"><span class="nav-number">2.1.</span> <span class="nav-text">接口摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类摘要"><span class="nav-number">2.2.</span> <span class="nav-text">类摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#枚举摘要"><span class="nav-number">2.3.</span> <span class="nav-text">枚举摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常摘要"><span class="nav-number">2.4.</span> <span class="nav-text">异常摘要</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用说明"><span class="nav-number">3.</span> <span class="nav-text">使用说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CircuitBreaker-及其子类"><span class="nav-number">3.1.</span> <span class="nav-text">CircuitBreaker 及其子类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类层次结构"><span class="nav-number">3.1.1.</span> <span class="nav-text">类层次结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类详细介绍"><span class="nav-number">3.1.2.</span> <span class="nav-text">类详细介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CircuitBreaker"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">CircuitBreaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AbstractCircuitBreaker"><span class="nav-number">3.1.2.2.</span> <span class="nav-text">AbstractCircuitBreaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EventCountCircuitBreaker"><span class="nav-number">3.1.2.3.</span> <span class="nav-text">EventCountCircuitBreaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThresholdCircuitBreaker"><span class="nav-number">3.1.2.4.</span> <span class="nav-text">ThresholdCircuitBreaker</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Computable-lt-I-O-gt-及其子类"><span class="nav-number">3.2.</span> <span class="nav-text">Computable&lt;I,O&gt; 及其子类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类层次结构-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">类层次结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类详细介绍-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">类详细介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Computable-lt-I-O-gt"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">Computable&lt;I,O&gt;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Memoizer-lt-I-O-gt"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">Memoizer&lt;I,O&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析"><span class="nav-number">3.2.2.2.1.</span> <span class="nav-text">源码分析</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConcurrentInitializer-及其子类"><span class="nav-number">3.3.</span> <span class="nav-text">ConcurrentInitializer 及其子类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类层次结构-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">类层次结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类详细介绍-2"><span class="nav-number">3.3.2.</span> <span class="nav-text">类详细介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ConstantInitializer"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">ConstantInitializer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述"><span class="nav-number">3.3.2.1.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-1"><span class="nav-number">3.3.2.1.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例"><span class="nav-number">3.3.2.1.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LazyInitializer"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">LazyInitializer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-1"><span class="nav-number">3.3.2.2.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-2"><span class="nav-number">3.3.2.2.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-1"><span class="nav-number">3.3.2.2.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AtomicInitializer"><span class="nav-number">3.3.2.3.</span> <span class="nav-text">AtomicInitializer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-2"><span class="nav-number">3.3.2.3.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-3"><span class="nav-number">3.3.2.3.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-2"><span class="nav-number">3.3.2.3.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AtomicSafeInitializer"><span class="nav-number">3.3.2.4.</span> <span class="nav-text">AtomicSafeInitializer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-3"><span class="nav-number">3.3.2.4.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-4"><span class="nav-number">3.3.2.4.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-3"><span class="nav-number">3.3.2.4.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BackgroundInitializer"><span class="nav-number">3.3.2.5.</span> <span class="nav-text">BackgroundInitializer </span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-4"><span class="nav-number">3.3.2.5.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-5"><span class="nav-number">3.3.2.5.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-4"><span class="nav-number">3.3.2.5.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CallableBackgroundInitializer"><span class="nav-number">3.3.2.6.</span> <span class="nav-text">CallableBackgroundInitializer </span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-5"><span class="nav-number">3.3.2.6.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-6"><span class="nav-number">3.3.2.6.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-5"><span class="nav-number">3.3.2.6.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MultiBackgroundInitializer"><span class="nav-number">3.3.2.7.</span> <span class="nav-text">MultiBackgroundInitializer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#功能描述-6"><span class="nav-number">3.3.2.7.1.</span> <span class="nav-text">功能描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#源码分析-7"><span class="nav-number">3.3.2.7.2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代码示例-6"><span class="nav-number">3.3.2.7.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用选择"><span class="nav-number">3.3.3.</span> <span class="nav-text">使用选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BasicThreadFactory"><span class="nav-number">3.4.</span> <span class="nav-text">BasicThreadFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConcurrentUtils"><span class="nav-number">3.5.</span> <span class="nav-text">ConcurrentUtils</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方法列表"><span class="nav-number">3.5.1.</span> <span class="nav-text">方法列表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TimedSemaphore"><span class="nav-number">3.6.</span> <span class="nav-text">TimedSemaphore</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

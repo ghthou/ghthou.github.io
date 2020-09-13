@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Spring Boot,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="spring-boot-actuator 模块虽然为 Spring-Boot 项目提供了监控及管理的 API ，但是并没有提供对应的 UI 管理系统，此时我们可以使用开源的 Spring-Boot-Amin 来为我们的 Spring-Boot 项目提供一个可视化的管理页面 创建项目首先在创建一个简单的 Spring-Boot 项目，可以选择在 start.spring.io 中创建，然后导入 在项">
+<meta name="keywords" content="Java,Spring Boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Spring Boot Admin 管理 Spring Boot 项目">
+<meta property="og:url" content="https://ghthou.github.io/2018/09/26/使用Spring-Boot-Admin管理Spring-Boot项目/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="spring-boot-actuator 模块虽然为 Spring-Boot 项目提供了监控及管理的 API ，但是并没有提供对应的 UI 管理系统，此时我们可以使用开源的 Spring-Boot-Amin 来为我们的 Spring-Boot 项目提供一个可视化的管理页面 创建项目首先在创建一个简单的 Spring-Boot 项目，可以选择在 start.spring.io 中创建，然后导入 在项">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 Spring Boot Admin 管理 Spring Boot 项目">
+<meta name="twitter:description" content="spring-boot-actuator 模块虽然为 Spring-Boot 项目提供了监控及管理的 API ，但是并没有提供对应的 UI 管理系统，此时我们可以使用开源的 Spring-Boot-Amin 来为我们的 Spring-Boot 项目提供一个可视化的管理页面 创建项目首先在创建一个简单的 Spring-Boot 项目，可以选择在 start.spring.io 中创建，然后导入 在项">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2018/09/26/使用Spring-Boot-Admin管理Spring-Boot项目/">
+
+
+
+
+
+  <title>使用 Spring Boot Admin 管理 Spring Boot 项目 | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2018/09/26/使用Spring-Boot-Admin管理Spring-Boot项目/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 Spring Boot Admin 管理 Spring Boot 项目</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-26T13:08:26+00:00">
+                2018-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready.html" target="_blank" rel="noopener"><code>spring-boot-actuator</code></a> 模块虽然为 Spring-Boot 项目提供了监控及管理的 <code>API</code> ，但是并没有提供对应的 UI 管理系统，此时我们可以使用开源的 <a href="https://github.com/codecentric/spring-boot-admin" target="_blank" rel="noopener">Spring-Boot-Amin</a> 来为我们的 Spring-Boot 项目提供一个可视化的管理页面</p>
+<h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><p>首先在创建一个简单的 Spring-Boot 项目，可以选择在<a href="https://start.spring.io/" target="_blank" rel="noopener"> start.spring.io</a> 中创建，然后导入</p>
+<p>在项目顶级 <code>pom.xml</code> 定义 <code>spring-boot-admin</code> 的依赖版本</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">project.reporting.outputEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.reporting.outputEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">java.version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">java.version</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">spring-boot-admin.version</span>&gt;</span>2.0.3<span class="tag">&lt;/<span class="name">spring-boot-admin.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>de.codecentric<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-admin-dependencies<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;spring-boot-admin.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>import<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="创建-client-模块"><a href="#创建-client-模块" class="headerlink" title="创建 client 模块"></a>创建 client 模块</h4><p>在项目中创建一个用于与 <code>spring-boot-admin</code> 集成的演示模块 <code>client</code></p>
+<p>引入以下依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>de.codecentric<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-admin-starter-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>创建启动类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClientApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping</span>(<span class="string">"/"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"hello world"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(ClientApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时可以通过启动 <code>main</code> 方法查看启动是否正常</p>
+<h4 id="创建-server-模块"><a href="#创建-server-模块" class="headerlink" title="创建 server 模块"></a>创建 server 模块</h4><p>在项目中创建 <code>spring-boot-admin</code> 服务模块 <code>server</code></p>
+<p>引入如下依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>de.codecentric<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-admin-starter-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>创建启动类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableAdminServer</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServerApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(ServerApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建配置文件 <code>application.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="comment"># 配置服务端口</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8090</span></span><br></pre></td></tr></table></figure>
+<p>访问 <a href="http://localhost:8090" target="_blank" rel="noopener">localhost:8090</a> 即可进入 <code>spring-boot-admin</code> 管理页面，但是此时还没有项目与它进行集成，所以应用数为 0</p>
+<h3 id="集成-Spring-Boot-Admin-服务"><a href="#集成-Spring-Boot-Admin-服务" class="headerlink" title="集成 Spring-Boot-Admin 服务"></a>集成 Spring-Boot-Admin 服务</h3><p>在演示模块 <code>client</code> 中添加配置文件 <code>application.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment"># 项目名称</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">client</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">client:</span></span><br><span class="line">        <span class="comment"># 配置文档</span></span><br><span class="line">        <span class="comment"># http://codecentric.github.io/spring-boot-admin/current/#spring-boot-admin-client</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="comment"># spring-boot-admin 服务端地址</span></span><br><span class="line">        <span class="attr">url:</span> <span class="string">http://localhost:8090</span></span><br><span class="line"></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="comment"># 开放所有端点</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">"*"</span></span><br></pre></td></tr></table></figure>
+<p>再重启 <code>client</code>项目，此时 <code>client</code> 项目会向 <code>http://localhost:8090</code> 注册自己的服务信息</p>
+<p>刷新 <a href="http://localhost:8090" target="_blank" rel="noopener">localhost:8090</a> 页面，可发现 <code>client</code> 已经注册成功，此时可以查看 <code>client</code> 相关信息</p>
+<h3 id="高级配置"><a href="#高级配置" class="headerlink" title="高级配置"></a>高级配置</h3><h4 id="修改注册的服务地址"><a href="#修改注册的服务地址" class="headerlink" title="修改注册的服务地址"></a>修改注册的服务地址</h4><p>在默认配置中使用 <code>InetAddress.getLocalHost().getCanonicalHostName()</code> 获取服务地址，本地环境一般没有问题，但是在生产环境中可能获取的是本机内网<code>IP</code>，导致<code>spring-boot-admin</code> 无法访问注册的服务，所以需要更改注册时的服务地址，配置方式如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">client:</span></span><br><span class="line">        <span class="attr">instance:</span></span><br><span class="line">          <span class="attr">service-base-url:</span> <span class="string">"可供 spring-boot-admin 访问的基础地址,格式为 http://&#123;主机或IP地址&#125;:&#123;端口&#125;/"</span></span><br></pre></td></tr></table></figure>
+<h4 id="安全配置"><a href="#安全配置" class="headerlink" title="安全配置"></a>安全配置</h4><h5 id="server-端安全配置"><a href="#server-端安全配置" class="headerlink" title="server 端安全配置"></a>server 端安全配置</h5><p>使用<code>spring-security</code>实现登录验证</p>
+<p>首先引入依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>创建<code>spring-security</code> 配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置文件中的 spring.boot.admin.context-path 属性值</span></span><br><span class="line"><span class="comment">     * 下列中涉及到该参数的都是为了处理对 context-path 的支持</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String adminContextPath;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SecuritySecureConfig</span><span class="params">(AdminServerProperties adminServerProperties)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.adminContextPath = adminServerProperties.getContextPath();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// @formatter:off</span></span><br><span class="line">        SavedRequestAwareAuthenticationSuccessHandler successHandler = <span class="keyword">new</span> SavedRequestAwareAuthenticationSuccessHandler();</span><br><span class="line">        successHandler.setTargetUrlParameter(<span class="string">"redirectTo"</span>);</span><br><span class="line">        successHandler.setDefaultTargetUrl(adminContextPath + <span class="string">"/"</span>);</span><br><span class="line"></span><br><span class="line">        http.authorizeRequests()</span><br><span class="line">                <span class="comment">// 对静态资源与登录url放行</span></span><br><span class="line">                .antMatchers(adminContextPath + <span class="string">"/assets/**"</span>).permitAll()</span><br><span class="line">                .antMatchers(adminContextPath + <span class="string">"/login"</span>).permitAll()</span><br><span class="line">                <span class="comment">// 其他请求需要登录</span></span><br><span class="line">                .anyRequest().authenticated()</span><br><span class="line">                .and()</span><br><span class="line">                <span class="comment">// 配置登录url,主要是为了支持 spring.boot.admin.context-path 属性</span></span><br><span class="line">                .formLogin().loginPage(adminContextPath + <span class="string">"/login"</span>).successHandler(successHandler).and()</span><br><span class="line">                <span class="comment">// 配置注销url</span></span><br><span class="line">                .logout().logoutUrl(adminContextPath + <span class="string">"/logout"</span>).and()</span><br><span class="line">                .httpBasic().and()</span><br><span class="line">                .csrf()</span><br><span class="line">                <span class="comment">// 配置 csrf,在前端使用 cookie 保存 csrf 参数</span></span><br><span class="line">                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())</span><br><span class="line">                <span class="comment">// 对 instances,actuator url忽略 csrf 验证</span></span><br><span class="line">                .ignoringAntMatchers(</span><br><span class="line">                        adminContextPath + <span class="string">"/instances"</span>,</span><br><span class="line">                        adminContextPath + <span class="string">"/actuator/**"</span></span><br><span class="line">                );</span><br><span class="line">        <span class="comment">// @formatter:on</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>application.yml</code>配置默认帐号，密码</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">security:</span></span><br><span class="line">    <span class="attr">user:</span></span><br><span class="line">      <span class="comment"># 配置默认用户</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">root</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">root</span></span><br></pre></td></tr></table></figure>
+<p>如果帐号密码是保存在数据库中，配置方式请查看该博客 <a href="https://www.baeldung.com/spring-security-authentication-with-a-database" target="_blank" rel="noopener">使用数据库进行身份认证</a></p>
+<p>重启 <code>server</code> 模块，此次刷新<a href="http://localhost:8090" target="_blank" rel="noopener"> localhost:8090</a> ，会重定向到登录页面，输入配置的默认帐号，密码即可登录</p>
+<p>但是因为 <code>server</code> 端配置了登录验证，所以导致客户端无法注册，此时需要在 <code>client</code> 配置登录 <code>server</code> 所需的帐号与密码</p>
+<p> 配置方式如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">client:</span></span><br><span class="line">        <span class="comment"># spring-boot-admin 服务端帐号密码</span></span><br><span class="line">        <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">root</span></span><br></pre></td></tr></table></figure>
+<h5 id="client-端安全配置"><a href="#client-端安全配置" class="headerlink" title="client 端安全配置"></a>client 端安全配置</h5><p><code>client</code> 端主要是保护 <code>management</code> 中开放的 <code>web</code>  端点</p>
+<p>首先引入依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>创建<code>spring-security</code> 配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置文件中的 management.endpoints.web.base-path 属性值</span></span><br><span class="line"><span class="comment">     * 这里只对 web 端点做登录验证</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String endpointsBasePath;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SpringSecurityConfig</span><span class="params">(WebEndpointProperties webEndpointProperties)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.endpointsBasePath = webEndpointProperties.getBasePath();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.authorizeRequests()</span><br><span class="line">                <span class="comment">// web端点需要登录</span></span><br><span class="line">                .antMatchers(endpointsBasePath + <span class="string">"/**"</span>).authenticated()</span><br><span class="line">                <span class="comment">// 其他请求进行忽略</span></span><br><span class="line">                .anyRequest().permitAll()</span><br><span class="line">                <span class="comment">// 使用 httpBasic 进行登录验证,这是 spring-boot-admin server 的验证方式</span></span><br><span class="line">                .and().httpBasic()</span><br><span class="line">        <span class="comment">// 如果不配置 formLogin,不会重定向到登录页,因为不需要登录页面</span></span><br><span class="line">        <span class="comment">// .and().formLogin()</span></span><br><span class="line">        ;</span><br><span class="line">        <span class="comment">// 忽略对端点的 csrf 验证,或者直接关闭 csrf,http.csrf().disable();</span></span><br><span class="line">        http.csrf().ignoringAntMatchers(endpointsBasePath + <span class="string">"/**"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>application.yml</code>配置默认帐号，密码</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">security:</span></span><br><span class="line">    <span class="attr">user:</span></span><br><span class="line">      <span class="comment"># 配置默认用户</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">admin</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">admin</span></span><br></pre></td></tr></table></figure>
+<p>同时为了允许 <code>server</code> 访问 <code>client</code> 的 <code>web</code> 端点，我们在注册时需要提供 <code>client</code> 的帐号与密码</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">client:</span></span><br><span class="line">        <span class="attr">instance:</span></span><br><span class="line">          <span class="attr">metadata:</span></span><br><span class="line">            <span class="comment"># 配置登录本服务需要的帐号与密码,用于让 spring-boot-admin 登录本服务</span></span><br><span class="line">            <span class="attr">user.name:</span> <span class="string">$&#123;spring.security.user.name&#125;</span></span><br><span class="line">            <span class="attr">user.password:</span> <span class="string">$&#123;spring.security.user.password&#125;</span></span><br></pre></td></tr></table></figure>
+<h6 id="端点配置"><a href="#端点配置" class="headerlink" title="端点配置"></a>端点配置</h6><p>在演示项目中，我们选择了开放所有端口，为了安全起见，我们应该只开放需要的端口</p>
+<p>其中各个端点的作用请看官网文档 <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-endpoints" target="_blank" rel="noopener">Spring-Boot 端点</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">jmx:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">exclude:</span> <span class="string">"*"</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">"*"</span></span><br><span class="line">        <span class="comment"># 排除关闭服务端点</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">shutdown</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">health:</span></span><br><span class="line">      <span class="comment"># 只有用户登录才显示 health 详情</span></span><br><span class="line">      <span class="attr">show-details:</span> <span class="string">when_authorized</span></span><br><span class="line">    <span class="comment"># 禁用关闭服务端点</span></span><br><span class="line">    <span class="attr">shutdown:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<h4 id="配置日志文件实时查看"><a href="#配置日志文件实时查看" class="headerlink" title="配置日志文件实时查看"></a>配置日志文件实时查看</h4><p>如果想在 <code>server</code> 查看 <code>client</code> 当前写入的日志文件内容，只需在 <code>client</code> 的配置文件中配置 <code>logging.path</code>或<code>logging.file</code> 属性即可，此时 <code>server</code> 会存在一个 <code>Logfile</code> 的标签，点击该标签即可查看</p>
+<h4 id="配置邮件通知"><a href="#配置邮件通知" class="headerlink" title="配置邮件通知"></a>配置邮件通知</h4><p>首先在<code>server</code>引入依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-mail<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>邮箱发送相关配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mail:</span></span><br><span class="line">    <span class="comment"># 邮箱服务器地址,如QQ邮箱的为 smtp.qq.com,阿里云企业邮箱的为 smtp.qiye.aliyun.com</span></span><br><span class="line">    <span class="attr">host:</span> <span class="string">smtp.example.com</span></span><br><span class="line">    <span class="comment"># 发件人帐号</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">example@example.com</span></span><br><span class="line">    <span class="comment"># 发件人密码</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">example</span></span><br><span class="line">    <span class="comment"># 邮箱服务器端口</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">465</span></span><br><span class="line">    <span class="comment"># 邮件协议</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">smtp</span></span><br><span class="line">    <span class="comment"># 默认字符编码</span></span><br><span class="line">    <span class="attr">default-encoding:</span> <span class="string">UTF-8</span></span><br><span class="line">    <span class="comment"># 测试配置可用性</span></span><br><span class="line">    <span class="attr">test-connection:</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 如果使用加密端口需要添加下面的配置,否则不需要</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">mail.smtp.ssl.enable:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p><code>server</code> 发送邮件配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">notify:</span></span><br><span class="line">        <span class="attr">mail:</span></span><br><span class="line">          <span class="comment"># http://codecentric.github.io/spring-boot-admin/current/#mail-notifications</span></span><br><span class="line">          <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">          <span class="comment"># 发件人</span></span><br><span class="line">          <span class="attr">from:</span> <span class="string">Spring-Boot-Admin</span> <span class="string">&lt;$&#123;spring.mail.username&#125;&gt;</span></span><br><span class="line">          <span class="comment"># 收件人,如果存在多个,使用逗号分隔</span></span><br><span class="line">          <span class="attr">to:</span> <span class="string">example@example.com</span></span><br></pre></td></tr></table></figure>
+<p>此时重启 <code>server</code> 端，然后停止 <code>client</code> 端，检查收件箱，可以发现已经接收到下线通知（接受邮件可能存在延迟）</p>
+<h3 id="重构"><a href="#重构" class="headerlink" title="重构"></a>重构</h3><p>在上面的示例中，已经演示了一些基本的配置，而在实际开发中，一般情况下是一个 <code>server</code> 对应多个 <code>client</code>，多个 <code>client</code> 之间注册 <code>server</code> 的配置应该是一样的，此时我们可以选择将一些通用的配置抽取出来，以达到复用的效果</p>
+<p>创建 <code>commons</code> 模块</p>
+<p>在 <code>resources</code> 下创建 <code>config</code> 文件夹，用于存放通用的配置文件</p>
+<p>创建通用邮箱配置文件 <code>application-commons-mail.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mail:</span></span><br><span class="line">    <span class="comment"># 邮箱服务器地址,如QQ邮箱的为 smtp.qq.com,阿里云企业邮箱的为 smtp.qiye.aliyun.com</span></span><br><span class="line">    <span class="attr">host:</span> <span class="string">smtp.example.com</span></span><br><span class="line">    <span class="comment"># 发件人帐号</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">example@example.com</span></span><br><span class="line">    <span class="comment"># 发件人密码</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">example</span></span><br><span class="line">    <span class="comment"># 邮箱服务器端口</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">465</span></span><br><span class="line">    <span class="comment"># 邮件协议</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">smtp</span></span><br><span class="line">    <span class="comment"># 默认字符编码</span></span><br><span class="line">    <span class="attr">default-encoding:</span> <span class="string">UTF-8</span></span><br><span class="line">    <span class="comment"># 测试配置可用性</span></span><br><span class="line">    <span class="attr">test-connection:</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 如果使用加密端口需要添加下面的配置,否则不需要</span></span><br><span class="line">    <span class="attr">properties:</span></span><br><span class="line">      <span class="attr">mail.smtp.ssl.enable:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>创建 <code>client</code> 端默认用户配置文件 <code>application-commons-spring-boot-admin-client-user.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">security:</span></span><br><span class="line">    <span class="attr">user:</span></span><br><span class="line">      <span class="comment"># 配置默认用户</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">admin</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">admin</span></span><br></pre></td></tr></table></figure>
+<p>创建 <code>server</code> 端用户及 <code>url</code> 配置文件 <code>application-commons-spring-boot-admin-server.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring-boot-admin:</span></span><br><span class="line">  <span class="attr">server:</span></span><br><span class="line">    <span class="comment"># spring-boot-admin server 端口</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8090</span></span><br><span class="line">    <span class="comment"># spring-boot-admin server 注册基本地址</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">http://localhost:$&#123;spring-boot-admin.server.port&#125;</span></span><br><span class="line">    <span class="comment"># spring-boot-admin server 用户名</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">root</span></span><br><span class="line">    <span class="comment"># spring-boot-admin server 密码</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">root</span></span><br></pre></td></tr></table></figure>
+<p>创建 <code>client</code> 集成 <code>spring-boot-admin</code> 的通用配置文件 <code>application-commons-spring-boot-admin-client.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">    <span class="attr">include:</span></span><br><span class="line">      <span class="comment"># 引入前面的俩个配置文件</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">commons-spring-boot-admin-client-user</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">commons-spring-boot-admin-server</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">client:</span></span><br><span class="line">        <span class="comment"># 配置文档</span></span><br><span class="line">        <span class="comment"># http://codecentric.github.io/spring-boot-admin/current/#spring-boot-admin-client</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="comment"># 服务端地址</span></span><br><span class="line">        <span class="attr">url:</span> <span class="string">$&#123;spring-boot-admin.server.url&#125;</span></span><br><span class="line">        <span class="comment"># 服务端帐号</span></span><br><span class="line">        <span class="attr">username:</span> <span class="string">$&#123;spring-boot-admin.server.username&#125;</span></span><br><span class="line">        <span class="comment"># 服务端密码</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">$&#123;spring-boot-admin.server.password&#125;</span></span><br><span class="line">        <span class="attr">instance:</span></span><br><span class="line">          <span class="attr">metadata:</span></span><br><span class="line">            <span class="comment"># 配置登录本服务需要的帐号与密码,用于让 spring-boot-admin 登录本服务</span></span><br><span class="line">            <span class="attr">user.name:</span> <span class="string">$&#123;spring.security.user.name&#125;</span></span><br><span class="line">            <span class="attr">user.password:</span> <span class="string">$&#123;spring.security.user.password&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">jmx:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">exclude:</span> <span class="string">"*"</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">"*"</span></span><br><span class="line">        <span class="comment"># 排除关闭服务端点</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">shutdown</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">health:</span></span><br><span class="line">      <span class="comment"># 只有用户登录才显示 health 详情</span></span><br><span class="line">      <span class="attr">show-details:</span> <span class="string">when_authorized</span></span><br><span class="line">    <span class="comment"># 禁用关闭服务端点</span></span><br><span class="line">    <span class="attr">shutdown:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>将 <code>client</code> 端的 <code>spring-security</code> 配置类 <code>SpringSecurityConfig</code> 迁移到 <code>commons</code> 模块</p>
+<p>在 <code>client</code> 端的启动类 <code>ClientApplication</code> 上添加一个注解配置 <code>@ImportAutoConfiguration(SpringSecurityConfig.class)</code> 表示应用这个配置类</p>
+<p>修改 <code>client</code> 的配置文件 <code>application.yml</code> 为</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment"># 项目名称</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">client</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">    <span class="attr">include:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">commons-spring-boot-admin-client</span></span><br></pre></td></tr></table></figure>
+<p>修改 <code>server</code> 的配置文件 <code>application.yml</code> 为</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="comment"># 配置服务端口</span></span><br><span class="line">  <span class="attr">port:</span> <span class="string">$&#123;spring-boot-admin.server.port&#125;</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">    <span class="attr">include:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">commons-mail</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">commons-spring-boot-admin-server</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment"># 应用名称,用于与其他应用进行区分</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">spring-boot-admin</span></span><br><span class="line">  <span class="attr">security:</span></span><br><span class="line">    <span class="attr">user:</span></span><br><span class="line">      <span class="comment"># 配置默认用户</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">$&#123;spring-boot-admin.server.username&#125;</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">$&#123;spring-boot-admin.server.password&#125;</span></span><br><span class="line">  <span class="attr">boot:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">notify:</span></span><br><span class="line">        <span class="attr">mail:</span></span><br><span class="line">          <span class="comment"># http://codecentric.github.io/spring-boot-admin/current/#mail-notifications</span></span><br><span class="line">          <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">          <span class="comment"># 发件人</span></span><br><span class="line">          <span class="attr">from:</span> <span class="string">Spring-Boot-Admin</span> <span class="string">&lt;$&#123;spring.mail.username&#125;&gt;</span></span><br><span class="line">          <span class="comment"># 收件人,如果存在多个,使用逗号分隔</span></span><br><span class="line">          <span class="attr">to:</span> <span class="string">example@example.com</span></span><br></pre></td></tr></table></figure>
+<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><p><a href="https://github.com/ghthou/spring-boot-admin-samples" target="_blank" rel="noopener">GitHub</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/25/Spring-Boot项目启动异常时使用邮件通知/" rel="next" title="Spring Boot 项目启动异常时使用邮件通知">
+                <i class="fa fa-chevron-left"></i> Spring Boot 项目启动异常时使用邮件通知
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/04/Spring-MVC-配置接收-String-参数时自动去除前后空格/" rel="prev" title="Spring MVC 配置接收 String 参数时自动去除前后空格">
+                Spring MVC 配置接收 String 参数时自动去除前后空格 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建项目"><span class="nav-number">1.</span> <span class="nav-text">创建项目</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-client-模块"><span class="nav-number">1.1.</span> <span class="nav-text">创建 client 模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-server-模块"><span class="nav-number">1.2.</span> <span class="nav-text">创建 server 模块</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集成-Spring-Boot-Admin-服务"><span class="nav-number">2.</span> <span class="nav-text">集成 Spring-Boot-Admin 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高级配置"><span class="nav-number">3.</span> <span class="nav-text">高级配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改注册的服务地址"><span class="nav-number">3.1.</span> <span class="nav-text">修改注册的服务地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安全配置"><span class="nav-number">3.2.</span> <span class="nav-text">安全配置</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#server-端安全配置"><span class="nav-number">3.2.1.</span> <span class="nav-text">server 端安全配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#client-端安全配置"><span class="nav-number">3.2.2.</span> <span class="nav-text">client 端安全配置</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#端点配置"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">端点配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置日志文件实时查看"><span class="nav-number">3.3.</span> <span class="nav-text">配置日志文件实时查看</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置邮件通知"><span class="nav-number">3.4.</span> <span class="nav-text">配置邮件通知</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重构"><span class="nav-number">4.</span> <span class="nav-text">重构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码"><span class="nav-number">5.</span> <span class="nav-text">源码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

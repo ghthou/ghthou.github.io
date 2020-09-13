@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,QRcode,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="通过 使用 zxing 生成二维码 我们可以实现简单二维码的生成, 但是二维码显示却过于单调, 本文变讲述如何利用 thumbnailator 为我们的二维码添加 LOGO  thumbnailator 是一个缩略图工具类库, 但它除了能缩略图片外, 还提供裁剪, 旋转, 水印等功能, 此次我们便借助它的水印 API 实现以上需求 项目环境 jdk1.8 thumbnailator  12345">
+<meta name="keywords" content="Java,QRcode">
+<meta property="og:type" content="article">
+<meta property="og:title" content="生成带 LOGO 的二维码">
+<meta property="og:url" content="https://ghthou.github.io/2018/01/13/生成带-LOGO-的二维码/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="通过 使用 zxing 生成二维码 我们可以实现简单二维码的生成, 但是二维码显示却过于单调, 本文变讲述如何利用 thumbnailator 为我们的二维码添加 LOGO  thumbnailator 是一个缩略图工具类库, 但它除了能缩略图片外, 还提供裁剪, 旋转, 水印等功能, 此次我们便借助它的水印 API 实现以上需求 项目环境 jdk1.8 thumbnailator  12345">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ghthou.github.io/images/生成带-LOGO-的二维码/qrCode.png">
+<meta property="og:image" content="https://ghthou.github.io/images/生成带-LOGO-的二维码/logo.png">
+<meta property="og:image" content="https://ghthou.github.io/images/生成带-LOGO-的二维码/logoQrCode.png">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="生成带 LOGO 的二维码">
+<meta name="twitter:description" content="通过 使用 zxing 生成二维码 我们可以实现简单二维码的生成, 但是二维码显示却过于单调, 本文变讲述如何利用 thumbnailator 为我们的二维码添加 LOGO  thumbnailator 是一个缩略图工具类库, 但它除了能缩略图片外, 还提供裁剪, 旋转, 水印等功能, 此次我们便借助它的水印 API 实现以上需求 项目环境 jdk1.8 thumbnailator  12345">
+<meta name="twitter:image" content="https://ghthou.github.io/images/生成带-LOGO-的二维码/qrCode.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2018/01/13/生成带-LOGO-的二维码/">
+
+
+
+
+
+  <title>生成带 LOGO 的二维码 | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2018/01/13/生成带-LOGO-的二维码/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">生成带 LOGO 的二维码</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-13T05:02:00+00:00">
+                2018-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>通过 <a href="/2018/01/13/使用-zxing-生成二维码">使用 zxing 生成二维码</a> 我们可以实现简单二维码的生成, 但是二维码显示却过于单调, 本文变讲述如何利用 <a href="https://github.com/coobird/thumbnailator" target="_blank" rel="noopener">thumbnailator</a> 为我们的二维码添加 LOGO</p>
+</blockquote>
+<p><a href="https://github.com/coobird/thumbnailator" target="_blank" rel="noopener">thumbnailator</a> 是一个缩略图工具类库, 但它除了能缩略图片外, 还提供裁剪, 旋转, 水印等功能, 此次我们便借助它的水印 API 实现以上需求</p>
+<h3 id="项目环境"><a href="#项目环境" class="headerlink" title="项目环境"></a>项目环境</h3><ul>
+<li>jdk1.8</li>
+<li><a href="https://github.com/coobird/thumbnailator" target="_blank" rel="noopener">thumbnailator</a></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.coobird<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>thumbnailator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.4.8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h3><h4 id="生成"><a href="#生成" class="headerlink" title="生成"></a>生成</h4><ul>
+<li>准备一张二维码图片, 一张 logo 图片<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String qrCodeFilePath = <span class="string">"src/qrCode.jpg"</span>;</span><br><span class="line">String logoFilePath = <span class="string">"src/logo.jpg"</span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><img src="/images/生成带-LOGO-的二维码/qrCode.png" alt="src/qrCode.png, 内容为 1"><br><img src="/images/生成带-LOGO-的二维码/logo.png" alt="src/logo.png"></p>
+<ul>
+<li><p>根据文件路径生成一个图片构造对象( <code>Thumbnails.of()</code> 方法还可以接收 <code>BufferedImage</code>,<code>InputStream</code>,<code>URL</code>,<code>String</code> 的可变参数类型)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Thumbnails.Builder&lt;File&gt; builder = Thumbnails.of(<span class="keyword">new</span> File(qrCodeFilePath));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建一个水印对象, 水印对象需要三个参数 <code>Position position</code>, <code>BufferedImage watermarkImg</code>,<code>float opacity</code>, 其中 <code>Position</code> 是水印的坐标,<code>BufferedImage</code> 是水印图片,<code>opacity</code> 是不透明度, 值为 [0-1] 之间, 1 代表不透明.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BufferedImage bufferedImage = ImageIO.read(<span class="keyword">new</span> File(logoFilePath));</span><br><span class="line"><span class="comment">//Positions 实现了 Position 并提供九个坐标, 分别是 上左, 上中, 上右, 中左, 中中, 中右, 下左, 下中, 下右 我们使用正中的位置</span></span><br><span class="line">Watermark watermark = <span class="keyword">new</span> Watermark(Positions.CENTER, bufferedImage, <span class="number">1F</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>为二维码设置水印, 并设置缩略比例为 1(即不压缩), 输出到一个新文件中(<code>outputFormat()</code> 为指定输出格式, 如: jpg,png)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">builder.watermark(watermark).scale(<span class="number">1F</span>).toFile(<span class="keyword">new</span> File(<span class="string">"src/logoQrCode.png"</span>));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成后的二维码<br><img src="/images/生成带-LOGO-的二维码/logoQrCode.png" alt="src/logoQrCode.png"></p>
+<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><p>通过以上方法我们能够简单的为二维码添加 LOGO, 但是实际使用时远没有这样简单, 有以下几个问题</p>
+</li>
+<li><p>logo 图片的尺寸可能并不固定, 可能有大有小, 这样就会导致 logo 在二维码中太小或太大<br>这时我们可以在创建 <code>BufferedImage</code> 时将原图压缩 / 放大至指定尺寸, 也可以使用二维码的尺寸乘以一定比例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//forceSize(int width, int height) 指将图片强制压缩为指定宽高, 如不强制, 可使用 size(int width, int height)</span></span><br><span class="line">BufferedImage bufferedImage = Thumbnails.of(<span class="keyword">new</span> File(logoFilePath)).forceSize(<span class="number">120</span>, <span class="number">120</span>).asBufferedImage();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>图片显示, logo 图片可能不是一个图片文件, 同时生成好之后的图片希望直接输出在页面上<br><code>Thumbnails.of()</code> 可以接收 <code>BufferedImage</code>,<code>InputStream</code>,<code>URL</code>,<code>String</code>,<code>File</code> 的可变 (<strong> 批量处理需要 </strong>) 参数类型<br><code>ImageIO.read()</code> 可以接收 <code>File</code>,<code>ImageInputStream</code>,<code>InputStream</code>,<code>URL</code> 参数类型<br>以下为 SpringMVC 动态生成带 LOGO 二维码示例,<code>QRCodeUtil.toBufferedImage()</code> 具体实现请看 <a href="http://www.jianshu.com/p/05e9ee773898" target="_blank" rel="noopener">生成二维码之 Java (Google zxing) 篇</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> content 二维码内容</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> logoUrl logo 链接</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RequestMapping</span>(value = <span class="string">"/qrcode"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">qrcode</span><span class="params">(String content, String logoUrl, @RequestParam(defaultValue = <span class="string">"300"</span>)</span> <span class="keyword">int</span> width, @<span class="title">RequestParam</span><span class="params">(defaultValue = <span class="string">"300"</span>)</span> <span class="keyword">int</span> height,HttpServletResponse response) </span>&#123;</span><br><span class="line">    ServletOutputStream outputStream = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        outputStream = response.getOutputStream();</span><br><span class="line">        <span class="comment">// 根据 QRCodeUtil.toBufferedImage() 返回的 BufferedImage 创建图片构件对象</span></span><br><span class="line">        Thumbnails.Builder&lt;BufferedImage&gt; builder = Thumbnails.of(QRCodeUtil.toBufferedImage(content, width, height));</span><br><span class="line">        <span class="comment">// 将 logo 的尺寸设置为二维码的 30% 大小, 可以自己根据需求调节</span></span><br><span class="line">        BufferedImage logoImage = Thumbnails.of(<span class="keyword">new</span> URL(logoUrl)).forceSize((<span class="keyword">int</span>) (width * <span class="number">0.3</span>), (<span class="keyword">int</span>) (height * <span class="number">0.3</span>)).asBufferedImage();</span><br><span class="line">        <span class="comment">// 设置水印位置(居中), 水印图片 BufferedImage, 不透明度(1F 代表不透明)</span></span><br><span class="line">        builder.watermark(Positions.CENTER, logoImage, <span class="number">1F</span>).scale(<span class="number">1F</span>);</span><br><span class="line">        <span class="comment">// 此处需指定图片格式, 否者报 Output format not specified 错误</span></span><br><span class="line">        builder.outputFormat(<span class="string">"png"</span>).toOutputStream(outputStream);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (outputStream != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                outputStream.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 返回一个 BufferedImage 对象</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> content 二维码内容</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> width   宽</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> height  高</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BufferedImage <span class="title">toBufferedImage</span><span class="params">(String content, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> <span class="keyword">throws</span> WriterException, IOException </span>&#123;</span><br><span class="line">    BitMatrix bitMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, hints);</span><br><span class="line"><span class="keyword">return</span> MatrixToImageWriter.toBufferedImage(bitMatrix);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="拓展思考"><a href="#拓展思考" class="headerlink" title="拓展思考"></a>拓展思考</h4><p>以上案例可知 <a href="https://github.com/coobird/thumbnailator" target="_blank" rel="noopener">thumbnailator</a> 水印功能的强大. 然而除了实现以上案例外, 我们也可以根据水印功能实现另外一种需求.<br>比如公司现在有一个推广需求, 让用户为我们的产品进行宣传, 达到多少次就进行奖励. 传统的实现方式是一段文字再配上一个专属链接. 但是此方式往往太过单调, 枯燥. 这个时候如果我们让设计提供一张内容丰富, 带有二维码的宣传图片, 然后根据专属链接生成二维码与宣传图片进行组合. 这时用户就有了一张自己的专属宣传图片. 此时通过直接宣传专属图片往往会比文字加链接有着更好的效果.<br>注: 此功能在图片合成时需要对二维码的位置进行定位, 此时可使用 <code>Position</code> 的实现类 <code>Coordinate</code> 完成<br>使用如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Coordinate 存在一个 Coordinate(int x, int y) 构造函数, x 为水印距离底图左边的像素, y 为上边</span></span><br><span class="line">BufferedImage bufferedImage = ImageIO.read(<span class="keyword">new</span> File(logoFilePath));</span><br><span class="line">Watermark watermark = <span class="keyword">new</span> Watermark(<span class="keyword">new</span> Coordinate(<span class="number">100</span>, <span class="number">100</span>), bufferedImage, <span class="number">1F</span>);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/QRcode/" rel="tag"># QRcode</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/13/使用-zxing-生成二维码/" rel="next" title="使用 zxing 生成二维码">
+                <i class="fa fa-chevron-left"></i> 使用 zxing 生成二维码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/13/ZooKeeper-Curator-实现分布式锁/" rel="prev" title="ZooKeeper + Curator 实现分布式锁">
+                ZooKeeper + Curator 实现分布式锁 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#项目环境"><span class="nav-number">1.</span> <span class="nav-text">项目环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#操作步骤"><span class="nav-number">2.</span> <span class="nav-text">操作步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#生成"><span class="nav-number">2.1.</span> <span class="nav-text">生成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用"><span class="nav-number">2.2.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拓展思考"><span class="nav-number">2.3.</span> <span class="nav-text">拓展思考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Google Authenticator,三方接入,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="在网络攻击日益泛滥的今天，用户的密码可能会因为各种原因泄漏。 而一些涉及用户重要数据的服务，如 QQ，邮箱，银行，购物等等。 一但被有心人利用，那么除了自己隐私泄漏的风险外，还存在自己身份被冒充的危害，更有可能而导致极其严重的结果。 为此谷歌推出了 Google Authenticator 服务，其原理是在登录时除了输入密码外，还需根据 Google Authenticator APP 输入一个">
+<meta name="keywords" content="Java,Google Authenticator,三方接入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 集成 Google Authenticator">
+<meta property="og:url" content="https://ghthou.github.io/2018/01/13/Java-集成-Google-Authenticator/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="在网络攻击日益泛滥的今天，用户的密码可能会因为各种原因泄漏。 而一些涉及用户重要数据的服务，如 QQ，邮箱，银行，购物等等。 一但被有心人利用，那么除了自己隐私泄漏的风险外，还存在自己身份被冒充的危害，更有可能而导致极其严重的结果。 为此谷歌推出了 Google Authenticator 服务，其原理是在登录时除了输入密码外，还需根据 Google Authenticator APP 输入一个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ghthou.github.io/images/Java-接入-Google-Authenticator/扫描二维码.png">
+<meta property="og:image" content="https://ghthou.github.io/images/Java-接入-Google-Authenticator/扫描后新增一栏信息.png">
+<meta property="og:updated_time" content="2020-09-13T06:26:30.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java 集成 Google Authenticator">
+<meta name="twitter:description" content="在网络攻击日益泛滥的今天，用户的密码可能会因为各种原因泄漏。 而一些涉及用户重要数据的服务，如 QQ，邮箱，银行，购物等等。 一但被有心人利用，那么除了自己隐私泄漏的风险外，还存在自己身份被冒充的危害，更有可能而导致极其严重的结果。 为此谷歌推出了 Google Authenticator 服务，其原理是在登录时除了输入密码外，还需根据 Google Authenticator APP 输入一个">
+<meta name="twitter:image" content="https://ghthou.github.io/images/Java-接入-Google-Authenticator/扫描二维码.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2018/01/13/Java-集成-Google-Authenticator/">
+
+
+
+
+
+  <title>Java 集成 Google Authenticator | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2018/01/13/Java-集成-Google-Authenticator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java 集成 Google Authenticator</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-13T05:11:00+00:00">
+                2018-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>在网络攻击日益泛滥的今天，用户的密码可能会因为各种原因泄漏。 而一些涉及用户重要数据的服务，如 QQ，邮箱，银行，购物等等。 一但被有心人利用，那么除了自己隐私泄漏的风险外，还存在自己身份被冒充的危害，更有可能而导致极其严重的结果。 为此谷歌推出了 <code>Google Authenticator</code> 服务，其原理是在登录时除了输入密码外，还需根据 <code>Google Authenticator APP</code> 输入一个实时计算的验证码。 凭借此验证码，即使在密码泄漏的情况下，他人也无法登录你的账户</p>
+</blockquote>
+<h3 id="相关原理"><a href="#相关原理" class="headerlink" title="相关原理"></a>相关原理</h3><p><code>Google Authenticator</code> 使用了一种基于 <strong> 时间 </strong> 的 <code>TOTP</code> 算法，其中时间的选取为自 <code>1970-01-01 00:00:00</code> 以来的毫秒数除以 <code>30</code> 与 客户端及服务端约定的 <strong> 密钥 </strong> 进行计算，计算结果为一个 <strong>6 位数的字符串 </strong>（<em>首位数可能为 0，所以为字符串 </em>），所以在 <code>Google Authenticator</code> 中我们可以看见验证码每个 30 秒就会刷新一次。 更多详情可查看 <a href="https://blog.seetee.me/archives/73.html" target="_blank" rel="noopener">Google 账户两步验证的工作原理</a> 一文</p>
+<h3 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h3><p>由上可知，生成验证码有俩个重要的参数，其一为 <strong> 客户端与服务端约定的密钥 </strong>，其二便为 <strong>30 秒的个数 </strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 创建一个密钥</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">createSecretKey</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    SecureRandom random = <span class="keyword">new</span> SecureRandom();</span><br><span class="line">    <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">20</span>];</span><br><span class="line">    random.nextBytes(bytes);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Base32().encodeToString(bytes).toLowerCase();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1970-01-01 00:00:00 以来的毫秒数除以 30 </span></span><br><span class="line"><span class="keyword">long</span> time = System.currentTimeMillis() / <span class="number">1000</span> / <span class="number">30</span>;</span><br></pre></td></tr></table></figure>
+<p>根据这两个参数就可以生成一个验证码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 根据密钥获取验证码</span></span><br><span class="line"><span class="comment"> * 返回字符串是因为数值有可能以0开头</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> secretKey 密钥</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> time 第几个30秒 System.currentTimeMillis() / 1000 / 30</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">generateTOTP</span><span class="params">(String secretKey, <span class="keyword">long</span> time)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> Base32().decode(secretKey.toUpperCase());</span><br><span class="line">    String hexKey = Hex.encodeHexString(bytes);</span><br><span class="line">    String hexTime = Long.toHexString(time);</span><br><span class="line">    <span class="keyword">return</span> TOTP.generateTOTP(hexKey, hexTime, <span class="string">"6"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>因为 <code>Google Authenticator</code>（<em>以下简称 </em>App）计算验证码也需要 <strong> 密钥 </strong> 的参与，而时间 App 则会在本地获取，所以我们需要将 <strong> 密钥保存在 App 中 </strong>，同时为了与其他账户进行区分，除了密钥外，我们还需要录入 <strong> 服务名称 </strong>，<strong>用户账户 </strong> 信息。 而为了方便用户信息的录入，我们一般将所有信息生成一张二维码图片，让用户通过扫码自动填写相关信息<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 生成 Google Authenticator Key Uri</span></span><br><span class="line"><span class="comment"> * Google Authenticator 规定的 Key Uri 格式: otpauth://totp/&#123;issuer&#125;:&#123;account&#125;?secret=&#123;secret&#125;&amp;issuer=&#123;issuer&#125;</span></span><br><span class="line"><span class="comment"> * https://github.com/google/google-authenticator/wiki/Key-Uri-Format</span></span><br><span class="line"><span class="comment"> * 参数需要进行 url 编码 +号需要替换成%20</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> secret 密钥 使用 createSecretKey 方法生成</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> account 用户账户 如: example@domain.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> issuer 服务名称 如: Google,GitHub</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SneakyThrows</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">createKeyUri</span><span class="params">(String secret, String account, String issuer)</span> </span>&#123;</span><br><span class="line">    String qrCodeStr = <span class="string">"otpauth://totp/$&#123;issuer&#125;:$&#123;account&#125;?secret=$&#123;secret&#125;&amp;issuer=$&#123;issuer&#125;"</span>;</span><br><span class="line">    Builder&lt;String, String&gt; mapBuilder = ImmutableMap.builder();</span><br><span class="line">    mapBuilder.put(<span class="string">"account"</span>, URLEncoder.encode(account, <span class="string">"UTF-8"</span>).replace(<span class="string">"+"</span>, <span class="string">"%20"</span>));</span><br><span class="line">    mapBuilder.put(<span class="string">"secret"</span>, URLEncoder.encode(secret, <span class="string">"UTF-8"</span>).replace(<span class="string">"+"</span>, <span class="string">"%20"</span>));</span><br><span class="line">    mapBuilder.put(<span class="string">"issuer"</span>, URLEncoder.encode(issuer, <span class="string">"UTF-8"</span>).replace(<span class="string">"+"</span>, <span class="string">"%20"</span>));</span><br><span class="line">    <span class="keyword">return</span> StringSubstitutor.replace(qrCodeStr, mapBuilder.build());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>此时再根据上述信息生成二维码，二维码生成方式可参考以下两种方案</p>
+<ul>
+<li><a href="/2018/01/13/使用-zxing-生成二维码/">使用 zxing 生成二维码.md</a></li>
+<li><a href="/2018/01/13/使用-jQuery-qrcode-生成二维码/">使用 jQuery-qrcode 生成二维码.md</a></li>
+</ul>
+<p>此时选择使用 <code>Java</code> 的方式返回一个二维码图片流<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 将二维码图片输出到一个流中</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> content 二维码内容</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> stream  输出流</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> width   宽</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> height  高</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeToStream</span><span class="params">(String content, OutputStream stream, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> <span class="keyword">throws</span> WriterException, IOException </span>&#123;</span><br><span class="line">  BitMatrix bitMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, hints);</span><br><span class="line">  MatrixToImageWriter.writeToStream(bitMatrix, format, stream);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>扫描二维码<br><img src="/images/Java-接入-Google-Authenticator/扫描二维码.png" alt="扫描二维码"><br>扫描成功后会新增一栏验证码信息<br><img src="/images/Java-接入-Google-Authenticator/扫描后新增一栏信息.png" alt="扫描后新增一栏信息"><br>再让用户输入验证码，与服务端进行校验，如果校验通过，则表明用户可以完好使用该功能<br>因为验证码是使用基于时间的 <code>TOTP</code> 算法，依赖于客户端与服务端时间的一致性。 如果客户端时间与服务端时间相差过大，那在用户没有同步时间的情况下，永远与服务端进行匹配。 同时服务端也有可能出现时间偏差的情况，这样反而导致时间正确的用户校验无法通过<br>为了解决这种情况，我们可以使用 <strong> 时间偏移量 </strong> 来解决该问题，<code>GoogleAuthenticator</code> 验证码的时间参数为 <code>1970-01-01 00:00:00 以来的毫秒数除以 30</code>，所以每 30 秒就会更新一次。 但是我们在后台进行校验时，除了与当前生成的二维码进行校验外，还会对当前时间参数 <strong> 前后偏移量 </strong> 生成的验证码进行校验，只要其中任意一个能够校验通过，就代表该验证码是有效的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 时间前后偏移量 */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TIME_OFFSET = <span class="number">1</span>;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 校验方法</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> secretKey 密钥</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> totpCode TOTP 一次性密码</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 验证结果</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">verification</span><span class="params">(String secretKey, String totpCode)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> time = System.currentTimeMillis() / <span class="number">1000</span> / <span class="number">30</span>;</span><br><span class="line">    <span class="comment">// 优先计算当前时间,然后再计算偏移量,因为大部分情况下客户端与服务的时间一致</span></span><br><span class="line">    <span class="keyword">if</span> (StringUtils.equals(totpCode, generateTOTP(secretKey, time))) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = -TIME_OFFSET; i &lt;= TIME_OFFSET; i++) &#123;</span><br><span class="line">        <span class="comment">// i == 0 的情况已经算过</span></span><br><span class="line">        <span class="keyword">if</span> (i != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.equals(totpCode, generateTOTP(secretKey, time + i))) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="其他说明"><a href="#其他说明" class="headerlink" title="其他说明"></a>其他说明</h3><p>根据以上代码我们可以简单的创建一个 <code>Google Authenticator</code> 的应用。 但是与此同时，我们也发现 <code>Google Authenticator</code> 严重依赖手机，又因为 <code>Google Authenticator</code> <strong> 没有同步功能 </strong>，所以如果用户一不小心删除了记录信息，或者 App 被卸载，手机系统重装等情况。 就会导致 <code>Google Authenticator</code> 成为使用者的障碍。 此时我们可以使用 <strong><a href="https://www.authy.com/app/" target="_blank" rel="noopener">Authy</a></strong> 这款支持 <strong> 同步功能 </strong> 的 App 以解决删除，卸载，重装等问题。 同时 <strong><a href="https://www.authy.com/app/" target="_blank" rel="noopener">Authy</a></strong> 也存在 <strong><a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn" target="_blank" rel="noopener">Chrome 插件</a></strong> 版本，用于解决在手机丢失的情况下获取验证码。除了 <strong><a href="https://www.authy.com/" target="_blank" rel="noopener">Authy</a></strong> 这个选择外，我们还可以使用 <strong> 备用验证码 </strong> 的机制用户用于解决上述问题。 即在用户绑定 <code>Google Authenticator</code> 成功后自动为用户生成多个 <strong> 备用验证码 </strong>，然后在前台显示。 并让用户进行保存，再让用户使用备用验证码进行校验，以确保用户保存成功，可以参考 <strong> 印象笔记 </strong> 的用法 <a href="https://help.evernote.com/hc/sr-me/articles/213420077--%E5%A6%82%E4%BD%95%E5%BC%80%E5%90%AF%E5%8D%B0%E8%B1%A1%E7%AC%94%E8%AE%B0%E7%99%BB%E5%BD%95%E4%B8%A4%E6%AD%A5%E9%AA%8C%E8%AF%81-" target="_blank" rel="noopener">如何开启印象笔记登录两步验证？</a></p>
+<p>另外本文同时参考了以下资料</p>
+<ul>
+<li><a href="http://www.asaph.org/2016/04/google-authenticator-2fa-java.html" target="_blank" rel="noopener">Google Authenticator compatible 2-Factor Auth in Java</a></li>
+<li><a href="https://github.com/asaph/twofactorauth" target="_blank" rel="noopener">twofactorauth</a></li>
+<li><a href="http://awtqty-zhang.iteye.com/blog/1986275" target="_blank" rel="noopener">Google Authenticator JAVA 实例</a></li>
+<li><a href="https://blog.seetee.me/archives/73.html" target="_blank" rel="noopener">Google 账户两步验证的工作原理</a></li>
+<li><a href="https://github.com/wstrange/GoogleAuth" target="_blank" rel="noopener">GoogleAuth</a></li>
+</ul>
+<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><p><a href="https://github.com/ghthou/google-authenticator-integration" target="_blank" rel="noopener">GitHub</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Google-Authenticator/" rel="tag"># Google Authenticator</a>
+          
+            <a href="/tags/三方接入/" rel="tag"># 三方接入</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/13/Java-源码研究之线程池/" rel="next" title="Java 源码研究之线程池">
+                <i class="fa fa-chevron-left"></i> Java 源码研究之线程池
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/13/IntelliJ-IDEA-使用-lombok-减少冗长代码/" rel="prev" title="IntelliJ IDEA 使用 lombok 减少冗长代码">
+                IntelliJ IDEA 使用 lombok 减少冗长代码 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#相关原理"><span class="nav-number">1.</span> <span class="nav-text">相关原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现思路"><span class="nav-number">2.</span> <span class="nav-text">实现思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他说明"><span class="nav-number">3.</span> <span class="nav-text">其他说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码"><span class="nav-number">4.</span> <span class="nav-text">源码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
