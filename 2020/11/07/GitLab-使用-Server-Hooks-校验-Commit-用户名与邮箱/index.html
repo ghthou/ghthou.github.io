@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="GitLab,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="ghthou" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="校验原因在企业内部进行代码提交时, commit 中会存在提交者的 username 与 email 但该 username 与 email 是提交者在 Git 客户端自己设置的 如果提交者忘记设置或者设置错误, 并将 commit push 到远程服务后 当协作者需要寻找该 commit 提交者时, 错误的 username 与 email 会对协作者造成障碍 为解决这个问题, 需要在 GitL">
+<meta name="keywords" content="GitLab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GitLab 使用 Server Hooks 校验 Commit 用户名与邮箱">
+<meta property="og:url" content="https://ghthou.github.io/2020/11/07/GitLab-使用-Server-Hooks-校验-Commit-用户名与邮箱/index.html">
+<meta property="og:site_name" content="ghthou">
+<meta property="og:description" content="校验原因在企业内部进行代码提交时, commit 中会存在提交者的 username 与 email 但该 username 与 email 是提交者在 Git 客户端自己设置的 如果提交者忘记设置或者设置错误, 并将 commit push 到远程服务后 当协作者需要寻找该 commit 提交者时, 错误的 username 与 email 会对协作者造成障碍 为解决这个问题, 需要在 GitL">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-11-07T10:26:04.689Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GitLab 使用 Server Hooks 校验 Commit 用户名与邮箱">
+<meta name="twitter:description" content="校验原因在企业内部进行代码提交时, commit 中会存在提交者的 username 与 email 但该 username 与 email 是提交者在 Git 客户端自己设置的 如果提交者忘记设置或者设置错误, 并将 commit push 到远程服务后 当协作者需要寻找该 commit 提交者时, 错误的 username 与 email 会对协作者造成障碍 为解决这个问题, 需要在 GitL">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ghthou.github.io/2020/11/07/GitLab-使用-Server-Hooks-校验-Commit-用户名与邮箱/">
+
+
+
+
+
+  <title>GitLab 使用 Server Hooks 校验 Commit 用户名与邮箱 | ghthou</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ghthou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ghthou.github.io/2020/11/07/GitLab-使用-Server-Hooks-校验-Commit-用户名与邮箱/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ghthou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ghthou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">GitLab 使用 Server Hooks 校验 Commit 用户名与邮箱</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-07T07:53:00+00:00">
+                2020-11-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="校验原因"><a href="#校验原因" class="headerlink" title="校验原因"></a>校验原因</h1><p>在企业内部进行代码提交时, commit 中会存在提交者的 username 与 email</p>
+<p>但该 username 与 email 是提交者在 Git 客户端自己设置的</p>
+<p>如果提交者忘记设置或者设置错误, 并将 commit push 到远程服务后</p>
+<p>当协作者需要寻找该 commit 提交者时, 错误的 username 与 email 会对协作者造成障碍</p>
+<p>为解决这个问题, 需要在 GitLab 使用 Server Hooks 对 commit 进行校验, 只有 username 与 email 与 GitLab 中的一致才允许 push, 否则拒绝 push 并提示修改</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>如需对 commit 的 username 与 email 进行校验, 那么需要在校验脚本中获取 push 者的 username 与 email</p>
+<p>通过 <a href="https://docs.gitlab.com/ee/administration/server_hooks.html#environment-variables" target="_blank" rel="noopener">GitLab Server Hooks</a> 文档可知存在 <code>GL_USERNAME</code> 环境变量, 该变量的值为 push 者的 GitLab 的 username, 但是缺乏 email 相关环境变量</p>
+<p>为获取 push 者的 email, 需使用 GitLab 提供的 <a href="https://docs.gitlab.com/ee/api/users.html#list-users" target="_blank" rel="noopener">Users API</a> 进行获取</p>
+<p>通过 API 文档可知只有 admin 用户才返回用户 email, 所以需要先使用 admin 账号生成一个 TOKEN</p>
+<p>这个 TOKEN 只是用来获取获取用户 email, 故创建时选择 read_user 的范围即可</p>
+<h1 id="校验用户名与邮箱-hook"><a href="#校验用户名与邮箱-hook" class="headerlink" title="校验用户名与邮箱 hook"></a>校验用户名与邮箱 hook</h1><p>GitHub 的 <a href="https://github.com/github/platform-samples" target="_blank" rel="noopener">platform-samples</a> 项目提供了一个 <a href="https://github.com/github/platform-samples/blob/master/pre-receive-hooks/commit-current-user-check.sh" target="_blank" rel="noopener">commit-current-user-check.sh</a> 的 hook, 我们可以将该脚本下载下来, 进行修改即可</p>
+<p>以下是修改后的 <code>commit-current-user-check.sh</code> 文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 访问 GitLab API 所需的 token, 需使用 admin 用户生成, scope 选择 read_user 即可</span></span><br><span class="line"><span class="comment"># https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html</span></span><br><span class="line">TOKEN=<span class="string">"GitLab admin user read_user TOKEN"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># GitLab 服务的访问地址, 因为该脚本是放置在 GitLab 服务中, 所以使用本机地址即可</span></span><br><span class="line">GITLAB_URL=http://127.0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 python 提取 json 中的 name 和 email 代码</span></span><br><span class="line">get_name_and_email=<span class="string">"import sys, json;</span></span><br><span class="line"><span class="string">try:</span></span><br><span class="line"><span class="string">  obj=json.load(sys.stdin);</span></span><br><span class="line"><span class="string">  print(obj[0]['name']+':'+obj[0]['email'])</span></span><br><span class="line"><span class="string">except:</span></span><br><span class="line"><span class="string">    print('error')"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 访问 GitLab Users API 获取用户显示名称与 email</span></span><br><span class="line"><span class="comment"># GL_USERNAME 为 GitLab 的 username, 一般为英文, 而 commit 中的 username 我们一般设置为中文</span></span><br><span class="line"><span class="comment"># API 返回的数据为 json 格式, 通过 python 代码进行提取显示名称与 email</span></span><br><span class="line"><span class="comment"># 因为显示名称为中文, 为了解决乱码问题, 配置 PYTHONIOENCODING='UTF-8'</span></span><br><span class="line"><span class="comment"># python 返回的格式为 name:email</span></span><br><span class="line"><span class="comment"># https://docs.gitlab.com/ee/api/users.html#list-users</span></span><br><span class="line">GITLAB_NAME_EMAIL=`curl -s --header <span class="string">"Private-Token: <span class="variable">$&#123;TOKEN&#125;</span>"</span> <span class="string">"<span class="variable">$&#123;GITLAB_URL&#125;</span>/api/v4/users?username=<span class="variable">$&#123;GL_USERNAME&#125;</span>"</span> | PYTHONIOENCODING=<span class="string">'UTF-8'</span> python3 -c <span class="string">"<span class="variable">$&#123;get_name_and_email&#125;</span>"</span>`</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;GITLAB_NAME_EMAIL&#125;</span>"</span> == <span class="string">"error"</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Push 异常: GitLab 获取用户信息异常, 请通知管理员进行排查"</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 截取显示名称</span></span><br><span class="line">GITLAB_USER_NAME=<span class="variable">$&#123;GITLAB_NAME_EMAIL%:*&#125;</span></span><br><span class="line"><span class="comment"># 截取 email</span></span><br><span class="line">GITLAB_USER_EMAIL=<span class="variable">$&#123;GITLAB_NAME_EMAIL#*:&#125;</span></span><br><span class="line"></span><br><span class="line">zero_commit=<span class="string">"0000000000000000000000000000000000000000"</span></span><br><span class="line"></span><br><span class="line">excludeExisting=<span class="string">"--not --all"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> oldrev newrev refname; <span class="keyword">do</span></span><br><span class="line">  <span class="comment"># branch or tag get deleted</span></span><br><span class="line">  <span class="keyword">if</span> [ <span class="string">"<span class="variable">$newrev</span>"</span> = <span class="string">"<span class="variable">$zero_commit</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">continue</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Check for new branch or tag</span></span><br><span class="line">  <span class="keyword">if</span> [ <span class="string">"<span class="variable">$oldrev</span>"</span> = <span class="string">"<span class="variable">$zero_commit</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    span=`git rev-list <span class="variable">$newrev</span> <span class="variable">$excludeExisting</span>`</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    span=`git rev-list <span class="variable">$oldrev</span>..<span class="variable">$newrev</span> <span class="variable">$excludeExisting</span>`</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> COMMIT <span class="keyword">in</span> <span class="variable">$span</span>;</span><br><span class="line">   <span class="keyword">do</span></span><br><span class="line">        AUTHOR_USER=`git <span class="built_in">log</span> --format=%an -n 1 <span class="variable">$&#123;COMMIT&#125;</span>`</span><br><span class="line">        AUTHOR_EMAIL=`git <span class="built_in">log</span> --format=%ae -n 1 <span class="variable">$&#123;COMMIT&#125;</span>`</span><br><span class="line">        COMMIT_USER=`git <span class="built_in">log</span> --format=%cn -n 1 <span class="variable">$&#123;COMMIT&#125;</span>`</span><br><span class="line">        COMMIT_EMAIL=`git <span class="built_in">log</span> --format=%ce -n 1 <span class="variable">$&#123;COMMIT&#125;</span>`</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 进行 username 与 email 校验</span></span><br><span class="line">        <span class="comment"># 在 GitHub 的示例脚本中启用了 AUTHOR_USER 与 AUTHOR_EMAIL 校验, 但是使用时可能存在 author 与 committer 不是同一个人的情况, 故注释校验 AUTHOR_USER 与 AUTHOR_EMAIL 的代码</span></span><br><span class="line">        <span class="comment"># 如果自己公司实际使用时不存在这种情况, 可以取消注释</span></span><br><span class="line">        <span class="comment"># author 与 committer 区别 https://stackoverflow.com/q/6755824</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#        if [[ $&#123;AUTHOR_USER&#125; != $&#123;GITLAB_USER_NAME&#125; ]]; then</span></span><br><span class="line"><span class="comment">#            echo -e "Push 异常: $&#123;COMMIT&#125; 的 author ($&#123;AUTHOR_USER&#125;) 不是 GitLab 中的中文名 ($&#123;GITLAB_USER_NAME&#125;)"</span></span><br><span class="line"><span class="comment">#            exit 20</span></span><br><span class="line"><span class="comment">#        fi</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> [[ <span class="variable">$&#123;COMMIT_USER&#125;</span> != <span class="variable">$&#123;GITLAB_USER_NAME&#125;</span> ]]; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> -e <span class="string">"Push 异常: <span class="variable">$&#123;COMMIT&#125;</span> 的 committer (<span class="variable">$&#123;COMMIT_USER&#125;</span>) 不是 GitLab 中的中文名 (<span class="variable">$&#123;GITLAB_USER_NAME&#125;</span>)"</span></span><br><span class="line">            <span class="built_in">exit</span> 30</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#        if [[ $&#123;AUTHOR_EMAIL&#125; != $&#123;GITLAB_USER_EMAIL&#125; ]]; then</span></span><br><span class="line"><span class="comment">#            echo -e "Push 异常: $&#123;COMMIT&#125; 的 author 的邮箱 ($&#123;AUTHOR_EMAIL&#125;) 不是 GitLab 中的邮箱 ($&#123;GITLAB_USER_EMAIL&#125;)"</span></span><br><span class="line"><span class="comment">#            exit 40</span></span><br><span class="line"><span class="comment">#        fi</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> [[ <span class="variable">$&#123;COMMIT_EMAIL&#125;</span> != <span class="variable">$&#123;GITLAB_USER_EMAIL&#125;</span> ]]; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">echo</span> -e <span class="string">"Push 异常: <span class="variable">$&#123;COMMIT&#125;</span> 的 committer 的邮箱 (<span class="variable">$&#123;COMMIT_EMAIL&#125;</span>) 不是 GitLab 中的邮箱 (<span class="variable">$&#123;GITLAB_USER_EMAIL&#125;</span>)"</span></span><br><span class="line">            <span class="built_in">exit</span> 50</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+<h1 id="配置-hook"><a href="#配置-hook" class="headerlink" title="配置 hook"></a>配置 hook</h1><p>由该 hook 功能可知其类型应为 <code>pre-receive</code> </p>
+<p>我们按照 <a href="https://docs.gitlab.com/ee/administration/server_hooks.html#create-a-global-server-hook-for-all-repositories" target="_blank" rel="noopener">GitLab 全局配置 Server Hook 文档</a> 将 <code>commit-current-user-check.sh</code>  放在 server hook 的 <code>pre-receive.d</code> 目录下</p>
+<p>并添加可执行权限与配置所属者为 git 用户即可</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod u+x commit-current-user-check.sh</span><br><span class="line">chown git:git commit-current-user-check.sh</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://docs.gitlab.com/ee/administration/server_hooks.html" target="_blank" rel="noopener">GitLab Server Hooks 文档</a></p>
+<p><a href="https://docs.gitlab.com/ee/api/README.html" target="_blank" rel="noopener">GitLab API 文档</a></p>
+<p><a href="https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html" target="_blank" rel="noopener">GitLab Personal access tokens 文档</a></p>
+<p><a href="https://docs.gitlab.com/ee/api/users.html" target="_blank" rel="noopener">GitLab Users API 文档</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/GitLab/" rel="tag"># GitLab</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/13/Jenkins-Multibranch-Pipeline-集成-GitLab-Webhook/" rel="next" title="Jenkins Multibranch Pipeline 集成 GitLab Webhook">
+                <i class="fa fa-chevron-left"></i> Jenkins Multibranch Pipeline 集成 GitLab Webhook
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">ghthou</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ghthou" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#校验原因"><span class="nav-number">1.</span> <span class="nav-text">校验原因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#校验用户名与邮箱-hook"><span class="nav-number">3.</span> <span class="nav-text">校验用户名与邮箱 hook</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置-hook"><span class="nav-number">4.</span> <span class="nav-text">配置 hook</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ghthou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
